@@ -3,6 +3,31 @@ import sys
 import os
 from sys import getrefcount
 
+def readFiles(globpattern):
+
+    import csv
+    import glob
+    import datetime
+    import time
+    csvfiles = glob.glob(globpattern)
+    files = []
+    for csvfile in csvfiles:
+        rows = []
+        with open (csvfile, 'r') as fh:
+            reader = csv.reader(fh)
+            reader.next()
+            for row in reader:
+                if len(row) <= 0:
+                    continue
+                row[0] = time.mktime(datetime.datetime.strptime(row[0],
+                    '%Y-%m-%d').timetuple())
+                print row
+                rows.append(row)
+
+        files.append(rows)
+
+    return files
+
 outline = """
 Topics
 ------
