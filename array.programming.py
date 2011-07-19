@@ -1,5 +1,6 @@
 # <demo> silent
 import sys
+import os
 from sys import getrefcount
 
 outline = """
