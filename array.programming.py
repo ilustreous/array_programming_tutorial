@@ -77,7 +77,7 @@ import numpy as np
 
 # read in all files (aapl, goog, nflx)
 #histdata = readfiles('*.csv')
-symbols = np.array(['AAPL', 'GOOG', 'NFLX', 'ZOOM'], dtype=str)
+symbols = np.array(['AAPL', 'GOOG', 'NFLX'], dtype=str)
 histdata = gethistdataforsymbols(symbols)
 
 # create an ndarray from the allfiles sequence
@@ -167,8 +167,6 @@ ann_devs = stdevs * (252 ** .5)
 # vol for symbol
 someindex = (symbols=='AAPL').nonzero()
 
-ann_devs[(symbols=='ZOOM').nonzero()][0]
-
 ann_devs[(symbols=='AAPL').nonzero()][0]
 
 ann_devs[(symbols=='GOOG').nonzero()][0]
@@ -199,6 +197,13 @@ std_prices = np.sqrt( mean_price_squred)
 
 # oneliner to get std of prices
 std_prices2 = np.sqrt( np.mean( np.abs(prices - prices.mean(axis=0))**2 , axis=0 ))
+
+
+# lets boxplot to visualize the stdev
+fig  = plt.figure()
+ax3 = fig.add_subplot(111)
+ax3.boxplot(prices, notch=0, sym='+', vert=1, whis=1.5, positions=None
+        , widths=None, patch_artist=False)
 
 #----------------------------------------------------
 #outline = """
