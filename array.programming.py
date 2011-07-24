@@ -9,13 +9,18 @@ LOW = 3
 CLOSE = 4
 VOLUME = 5
 ADJCLOSE = 6
+SUSQPROXY = {'http': 'http://http-proxy.susq.com:80'}
 
 def epochsec2datetime(epochsec):
     return datetime.datetime.fromtimestamp(epochsec)
 
 def testprices():
-    x = np.array([ 35.438 ,35.75 ,35.875 ,36.938 ,39.313 ,39.125 ,42.5 ,42.313 ,45.5 ,46.688 ,46.125 ,43.75 ,45.375 ,46.594 ,46.938 ,46.188 ,44.5 ,45.875 ,45.75 ,44.625 ,45 ,45.5 ,48.375 ,51 ,47.75])
-    y = np.vstack([x,x])
+    x = np.array([ 35.438,35.75 ,35.875 ,36.938 ,39.313 
+                  ,39.125 ,42.5 ,42.313 ,45.5 ,46.688 ,46.125 
+                  ,43.75 ,45.375 ,46.594 ,46.938 ,46.188 
+                  ,44.5 ,45.875 ,45.75 ,44.625 
+                  ,45 ,45.5 ,48.375 ,51 ,47.75])
+    y =           np.vstack([x,x])
     prices = y.transpose()
     return prices
 
@@ -27,14 +32,14 @@ def gethistdataforsymbols(syms, lookback=60):
         histdatas.append(gethistdatafromyahoo(sym)[0:lookback])
     return histdatas
 
-def gethistdatafromyahoo(sym):
+def gethistdatafromyahoo(sym, proxydict=None):
     #header: Date,Open,High,Low,Close,Volume,Adj Close
 
     import urllib
-    import time
 
-    url = "http://ichart.finance.yahoo.com/table.csv?s=%s&d=6&e=19&f=2011&g=d&a=8&b=7&c=1984&ignore=.csv" % sym
-    proxies = None #{'http': 'http://http-proxy.susq.com:80'}
+    url = "http://ichart.finance.yahoo.com/table.csv?s=%s&d\
+            =6&e=19&f=2011&g=d&a=8&b=7&c=1984&ignore=.csv" % sym
+    proxies = proxydict
     fh = urllib.urlopen(url, proxies=proxies)
     try:
         rows = []
@@ -53,7 +58,6 @@ def readfile(file_):
     #header: Date,Open,High,Low,Close,Volume,Adj Close
     import csv
     import datetime
-    import time
     rows = []
     with open (file_, 'r') as fh:
         reader = csv.reader(fh)
@@ -205,7 +209,8 @@ mean_price_squred = np.mean( abs_price_squared, axis=0 )
 std_prices = np.sqrt( mean_price_squred)
 
 # oneliner to get std of prices
-std_prices2 = np.sqrt( np.mean( np.abs(prices - prices.mean(axis=0)) ** 2 , axis=0 ))
+std_prices2 = np.sqrt( np.mean( 
+    np.abs(prices - prices.mean(axis=0)) ** 2 , axis=0 ))
 
 
 # lets boxplot to visualize the stdev
@@ -262,6 +267,89 @@ def monthly_returns(data, dates):
     ms = d2m(e2d(dates))
     (uniqvals, posfirstuniq, index) = np.unique(ms, True, True)
     seriesplot(data[posfirstuniq])
+
+# when working with big data it's good
+# to understand at least conceptually
+# memory management.
+# - when arrays are copied
+# - when arrays are referenced
+# - when arrays are destroyed
+# operations
+#   - slicing
+#   - passing an array to a function (altering a value/not altering a value)
+#   - assigning array to another variable and changing a value
+
+arr1 = np.ones(1e8)
+arr1.shape = (-1, 50)
+
+# Assignments do not create copy of arrays
+arr2 = arr1
+
+arr1 is arr2
+
+# Function calls do not copy arrays, mutable objects are passed by reference
+def myid(some_array):
+    return id(some_array)
+
+x = id(arr1)
+y = myid(arr2)
+
+x == y
+
+# views on arrays
+# new view on the same data
+arr1_view = arr1.view()
+
+# not the same
+arr1_view is arr1
+
+# the same
+arr1_view.base is arr1
+
+# doesn't own the data
+arr1_view.flags.owndata
+
+# changes shape
+arr1_view.shape = (-1, 2)
+
+# base is stil the same
+arr1_view.base is arr1
+
+# change data in view
+arr1_view[0,0] = 50
+
+# change data in both
+arr1_view[0,0] == arr1[0,0]
+
+# simple slicing creates a view 
+# of the array
+arr2_view = arr1[1:10, 50:60]
+
+#same base
+arr2_view.base is arr1
+
+
+# copy data
+arr1_copy = arr1.copy()
+
+# owns the data
+arr1_copy.flags.owndata
+
+# not equal
+arr1_copy is arr1
+
+# not equal
+arr1_copy.base is arr1
+
+# change value
+arr1_copy[0,0] = 30
+
+# does not change value of arr1
+arr1_copy[0,0] == arr1[0,0]
+
+# advanced slicing creates a copy of the data
+
+
 
 #----------------------------------------------------
 #outline = """
