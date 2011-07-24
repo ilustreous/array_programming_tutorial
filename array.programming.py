@@ -1,4 +1,6 @@
 import sys
+import datetime
+import time
 
 DATE = 0
 OPEN = 1
@@ -7,6 +9,9 @@ LOW = 3
 CLOSE = 4
 VOLUME = 5
 ADJCLOSE = 6
+
+def epochsec2datetime(epochsec):
+    return datetime.datetime.fromtimestamp(epochsec)
 
 def testprices():
     x = np.array([ 35.438 ,35.75 ,35.875 ,36.938 ,39.313 ,39.125 ,42.5 ,42.313 ,45.5 ,46.688 ,46.125 ,43.75 ,45.375 ,46.594 ,46.938 ,46.188 ,44.5 ,45.875 ,45.75 ,44.625 ,45 ,45.5 ,48.375 ,51 ,47.75])
@@ -26,7 +31,6 @@ def gethistdatafromyahoo(sym):
     #header: Date,Open,High,Low,Close,Volume,Adj Close
 
     import urllib
-    import datetime
     import time
 
     url = "http://ichart.finance.yahoo.com/table.csv?s=%s&d=6&e=19&f=2011&g=d&a=8&b=7&c=1984&ignore=.csv" % sym
@@ -75,10 +79,14 @@ def readfiles(globpattern):
 
 import numpy as np
 
-# read in all files (aapl, goog, nflx)
-#histdata = readfiles('*.csv')
+isyahoo = False
+
 symbols = np.array(['AAPL', 'GOOG', 'NFLX'], dtype=str)
-histdata = gethistdataforsymbols(symbols)
+if isyahoo:
+    # read in all files (aapl, goog, nflx)
+    histdata = gethistdataforsymbols(symbols)
+else:
+    histdata = readfiles('*.csv')
 
 # create an ndarray from the allfiles sequence
 arr_files = np.array(histdata, dtype = float)
@@ -103,6 +111,7 @@ volumes = arr_files[:, :, VOLUME].transpose()
 
 # dates
 dates = arr_files[:, :, DATE].transpose()
+dates = dates[:,0]
 
 minprice = prices.min()
 
@@ -122,7 +131,7 @@ from datetime import datetime as dt
 fig = plt.figure()
 ax1 = fig.add_subplot(111)
 AAPL_COL = 1
-dates_formatted = [dt.fromtimestamp(s) for s in dates[:, AAPL_COL]]
+dates_formatted = [dt.fromtimestamp(s) for s in dates]
 ax1.plot(dates_formatted, prices[:,AAPL_COL], 'b-')
 ax1.set_ylabel('price', color='b')
 for tl in ax1.get_yticklabels():
@@ -196,7 +205,7 @@ mean_price_squred = np.mean( abs_price_squared, axis=0 )
 std_prices = np.sqrt( mean_price_squred)
 
 # oneliner to get std of prices
-std_prices2 = np.sqrt( np.mean( np.abs(prices - prices.mean(axis=0))**2 , axis=0 ))
+std_prices2 = np.sqrt( np.mean( np.abs(prices - prices.mean(axis=0)) ** 2 , axis=0 ))
 
 
 # lets boxplot to visualize the stdev
@@ -204,6 +213,55 @@ fig  = plt.figure()
 ax3 = fig.add_subplot(111)
 ax3.boxplot(prices, notch=0, sym='+', vert=1, whis=1.5, positions=None
         , widths=None, patch_artist=False)
+
+# compare existing code to numpy version of it
+# --------------------------------------------
+# what's the take away?
+# wanted to show how imperative programming compares to array programming
+# denser code and conveys the meaning quite literally
+# works on columns of data not just one one sequence, so it scales well
+# much more efficient b/c all the hard things are taken care of in
+# very robust/tested c code
+
+percent_change = lambda data: np.diff(data, axis=0)/data[0:-1]
+
+def seriesplot(data):
+    fig = plt.figure()
+    ax4 = fig.add_subplot(111)
+    ax4.plot(data)
+
+def yyyymmdd2epochsec(yyyymmdd):
+    return time.mktime(datetime.datetime.strptime(str(yyyymmdd)
+                                                  ,'%Y%m%d').timetuple())
+
+qd2epoch = yyyymmdd2epochsec
+epoch2dt = epochsec2datetime
+
+def returnsplot(d1, d2, data, dates):
+    #dates in yyyymmdd format
+    plotvals = data[np.logical_and(dates > qd2epoch(d1), dates < qd2epoch(d2))]
+    seriesplot(percent_change(plotvals))
+
+def densityplot(data):
+    import pylab
+    dailyreturns = percent_change(data)
+    fig = plt.figure()
+    ax5 = fig.add_subplot(111)
+    ax5.hist(dailyreturns, bins=200, normed=True)
+    m, M = np.min(dailyreturns), np.max(dailyreturns)
+    mu = np.mean(dailyreturns)
+    sigma = np.std(dailyreturns)
+    grid = np.linspace(m, M, 100)
+    densityvalues = pylab.normpdf(grid, mu, sigma)
+    ax5.plot(grid, densityvalues, 'r-')
+    ax5.show()
+
+def monthly_returns(data, dates):
+    e2d = np.vectorize(epoch2dt)
+    d2m = np.vectorize(lambda x: x.month)
+    ms = d2m(e2d(dates))
+    (uniqvals, posfirstuniq, index) = np.unique(ms, True, True)
+    seriesplot(data[posfirstuniq])
 
 #----------------------------------------------------
 #outline = """
