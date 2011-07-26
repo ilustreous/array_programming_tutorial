@@ -43,8 +43,7 @@ def gethistdatafromyahoo(sym, proxydict=None):
 
     import urllib
 
-    url = "http://ichart.finance.yahoo.com/table.csv?s=%s&d\
-            =6&e=19&f=2011&g=d&a=8&b=7&c=1984&ignore=.csv" % sym
+    url = "http://ichart.finance.yahoo.com/table.csv?s=%s&d=6&e=19&f=2011&g=d&a=8&b=7&c=1984&ignore=.csv" % sym
     proxies = proxydict
     fh = urllib.urlopen(url, proxies=proxies)
     try:
@@ -94,7 +93,7 @@ isyahoo = True
 symbols = np.array(['AAPL', 'GOOG', 'NFLX', 'SINA'], dtype=str)
 if isyahoo:
     # read in all files (aapl, goog, nflx)
-    histdata = gethistdataforsymbols(symbols, proxydict=SUSQPROXY)
+    histdata = gethistdataforsymbols(symbols, proxydict=None)
 else:
     histdata = readfiles('data/csv/*.csv')
 
@@ -429,7 +428,7 @@ x = np.ones(12).reshape(3,4)
 y = np.array([1,2,3])
 
 #doesn't work
-x + y
+#x + y
 
 #works
 x + y[:,np.newaxis]
@@ -488,8 +487,7 @@ x + y[:,np.newaxis]
 # } PyArrayObject;
 
 # char *data;
-print >> sys.stdout, "Pointer to bytes in memory: %s" % arr_files.__array_interface['data']
-print >> sys.stdout, "Data that it is holding (binary data)" % str(arr_files.data)
+print >> sys.stdout, "Pointer to bytes in memory: %s" % str(arr_files.__array_interface__['data'])
 
 # int flags;
 print >> sys.stdout, "Flags: %s" % str(arr_files.flags)
@@ -552,6 +550,81 @@ struct.unpack(format_, a.data[rowpos : colpos])
 #Normally, these attributes are accessed using dictionary lookups 
 #such as arr['x'] and arr['y']. Record arrays allow the fields to be 
 #accessed as members of the array, using arr.x and arr.y.
+
+
+# create sql 
+def createtable(path='data/sqlite/histdatadb'):
+    import sqlite3
+    conn = sqlite3.connect(path)
+    cur = conn.cursor()
+    cur.execute("""DROP TABLE IF EXISTS prices""")
+    cur.execute("""CREATE TABLE prices (Date TEXT
+                                       ,Sym TEXT
+                                       ,Open REAL
+                                       ,High REAL
+                                       ,Low REAL
+                                       ,Close REAL
+                                       ,Volume INTEGER
+                                       ,AdjClose REAL)""")
+    conn.commit()
+    conn.close()
+
+def populatedata(files='data/csv/*.csv', path='data/sqlite/histdatadb'):
+    import sqlite3
+    conn = sqlite3.connect(path)
+
+    try:
+        cur = conn.cursor()
+
+        def insert(sym, data):
+
+            date = datetime.datetime.fromtimestamp(data[0]).strftime("%Y-%m-%d")
+            sym = sym
+            open_ = float(data[1])
+            high = float(data[2])
+            low = float(data[3])
+            close = float(data[4])
+            volume = float(data[5])
+            adjclose = float(data[6])
+            
+            insert = """
+            INSERT INTO prices (Date, Sym, Open, High, Low, Close, Volume, AdjClose)
+            VALUES ('%(date)s', '%(sym)s', %(open_)s, %(high)s, %(low)s, %(close)s,
+            %(volume)s, %(adjclose)s)
+            """ % vars()
+            print insert
+            cur.execute(insert)
+
+        import glob
+        files_ = glob.glob(files)
+        
+        histdata = readfiles(files)
+        syms = [x.split("/")[-1].split(".")[0] for x in files_]
+        symhistdata = zip(syms, histdata)
+        
+        for (s, hs) in symhistdata:
+            for h in hs:
+                insert(s, h)
+
+        conn.commit()
+    finally:
+        conn.close()
+
+def select(sqlcmd="select * from prices", path='data/sqlite/histdatadb'):
+    import sqlite3
+    conn = sqlite3.connect(path)
+    try:
+        cur = conn.cursor()
+        for row in cur.execute(sqlcmd):
+            yield row
+    finally:
+        conn.close()
+    return xs
+
+
+
+
+
 
 
 
