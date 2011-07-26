@@ -11,7 +11,13 @@ VOLUME = 5
 ADJCLOSE = 6
 SUSQPROXY = {'http': 'http://http-proxy.susq.com:80'}
 
+def is32bit():
+    import platform
+    
+    return '32' in platform.architecture()[0]
+
 def epochsec2datetime(epochsec):
+
     return datetime.datetime.fromtimestamp(epochsec)
 
 def testprices():
@@ -24,12 +30,12 @@ def testprices():
     prices = y.transpose()
     return prices
 
-def gethistdataforsymbols(syms, lookback=60):
+def gethistdataforsymbols(syms, lookback=60, **kwargs):
 
     histdatas = []
     for sym in syms:
         print >> sys.stdout, 'Getting hist data from yahoo: %s' % sym
-        histdatas.append(gethistdatafromyahoo(sym)[0:lookback])
+        histdatas.append(gethistdatafromyahoo(sym, **kwargs)[0:lookback])
     return histdatas
 
 def gethistdatafromyahoo(sym, proxydict=None):
@@ -83,14 +89,14 @@ def readfiles(globpattern):
 
 import numpy as np
 
-isyahoo = False
+isyahoo = True
 
-symbols = np.array(['AAPL', 'GOOG', 'NFLX'], dtype=str)
+symbols = np.array(['AAPL', 'GOOG', 'NFLX', 'SINA'], dtype=str)
 if isyahoo:
     # read in all files (aapl, goog, nflx)
-    histdata = gethistdataforsymbols(symbols)
+    histdata = gethistdataforsymbols(symbols, proxydict=SUSQPROXY)
 else:
-    histdata = readfiles('*.csv')
+    histdata = readfiles('data/csv/*.csv')
 
 # create an ndarray from the allfiles sequence
 arr_files = np.array(histdata, dtype = float)
@@ -228,7 +234,7 @@ ax3.boxplot(prices, notch=0, sym='+', vert=1, whis=1.5, positions=None
 # much more efficient b/c all the hard things are taken care of in
 # very robust/tested c code
 
-percent_change = lambda data: np.diff(data, axis=0)/data[0:-1]
+percent_change = lambda data: np.diff(data, axis=0) / data[0:-1]
 
 def seriesplot(data):
     fig = plt.figure()
@@ -279,7 +285,8 @@ def monthly_returns(data, dates):
 #   - passing an array to a function (altering a value/not altering a value)
 #   - assigning array to another variable and changing a value
 
-arr1 = np.ones(1e8)
+capacity = 1e3 if is32bit() else 1e8
+arr1 = np.ones(capacity)
 arr1.shape = (-1, 50)
 
 # Assignments do not create copy of arrays
@@ -396,9 +403,14 @@ y.flags
 #   [3,3,3,3]
 # = [3,4,5,6]
 
+x = np.array([0,1,2,3])
+x + 3
+
 #[1,1,1,1]
 #[1,1,1,1] + [1,2,3]
 #[1,1,1,1]
+#
+# vs
 #
 #[1,1,1,1]   [1
 #[1,1,1,1] +  2
@@ -412,6 +424,15 @@ y.flags
 #[2,2,2,2]
 #[3,3,3,3]
 #[4,4,4,4]
+
+x = np.ones(12).reshape(3,4)
+y = np.array([1,2,3])
+
+#doesn't work
+x + y
+
+#works
+x + y[:,np.newaxis]
 
 # Compare dims starting from the last
 # Match when either dimension is 
@@ -434,4 +455,103 @@ y.flags
 # (      8)
 # ---------
 #  xxx
+
+# "ndarray" is just a representation of of PyArrayObject in C
+# there is no magic here
+# typedef struct PyArrayObject {
+#         PyObject_HEAD
+#         char *data;             /* pointer to raw data buffer */
+#         int nd;                 /* number of dimensions, also called ndim */
+#         npy_intp *dimensions;   /* size in each dimension */
+#         npy_intp *strides;      /*
+#                                  * bytes to jump to get to the
+#                                  * next element in each dimension
+#                                  */
+#         PyObject *base;         /*
+#                                  * This object should be decref'd upon
+#                                  * deletion of array
+#                                  *
+#                                  * For views it points to the original
+#                                  * array
+#                                  *
+#                                  * For creation from buffer object it
+#                                  * points to an object that shold be
+#                                  * decref'd on deletion
+#                                  *
+#                                  * For UPDATEIFCOPY flag this is an
+#                                  * array to-be-updated upon deletion
+#                                  * of this one
+#                                  */
+#         PyArray_Descr *descr;   /* Pointer to type structure */
+#         int flags;              /* Flags describing array -- see below */
+#         PyObject *weakreflist;  /* For weakreferences */
+# } PyArrayObject;
+
+# char *data;
+print >> sys.stdout, "Pointer to bytes in memory: %s" % arr_files.__array_interface['data']
+print >> sys.stdout, "Data that it is holding (binary data)" % str(arr_files.data)
+
+# int flags;
+print >> sys.stdout, "Flags: %s" % str(arr_files.flags)
+
+# Array has to have the same type (occupy a fixed number
+# of bytes in memory) but that doesn't mean a type has to 
+# consist of a single item
+#PyArray_Descr *descr;   /* Pointer to type structure */
+print >> sys.stdout, "Dtype: %s" % arr_files.dtype
+
+# npy_inpt *strides;
+print >> sys.stdout, "Stride: %s" % str(arr_files.strides)
+
+# why are strides important
+# it is the key into mapping a n-dimensional to a 1-dimensional array
+a = np.arange(12)
+a.shape = (3,4)
+
+# all rows, all columns, step 2
+b = a[::2]
+
+a.strides == b.strides
+
+import struct
+if type(a[0,0]) == np.int64:
+    format_ = 'q'
+else:
+    format_ = 'd'
+
+nextrow = a.strides[0]
+nextelement = a.strides[1]
+elementsize = a.itemsize
+
+# get the first 8 bytes
+struct.unpack(format_, a.data[:elementsize])
+
+# get 2nd row by 1st column
+rowpos = nextrow
+colpos = rowpos + elementsize
+struct.unpack(format_, a.data[rowpos : colpos])
+
+# get 3rd row x 3rd col
+rowpos = (nextrow*2) + (nextelement*2)
+colpos = rowpos + nextelement
+struct.unpack(format_, a.data[rowpos : colpos])
+
+
+# Recarray vs Sql Querying
+#-------------------------------------------------------
+# We've seen imperative programming vs array programming 
+# Now let's see how array programming stacks up 
+# against sql queries, we'll use sqllite as our perferred
+# sql distro
+
+
+# We'll use a specific view on the ndarray; recarray
+# Arrays may have a data-types containing fields, analogous 
+#to columns in a spread sheet. An example is [(x, int), (y, float)],
+#where each entry in the array is a pair of (int, float). 
+#Normally, these attributes are accessed using dictionary lookups 
+#such as arr['x'] and arr['y']. Record arrays allow the fields to be 
+#accessed as members of the array, using arr.x and arr.y.
+
+
 
