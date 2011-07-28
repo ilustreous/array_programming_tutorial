@@ -1,6 +1,8 @@
 import sys
 import datetime
 import time
+import os
+
 
 DATE = 0
 OPEN = 1
@@ -85,6 +87,31 @@ def readfiles(globpattern):
     
     return files
 
+def iswinplatform():
+    """
+    Returns:
+    --------
+
+    True if you are running on windows platform
+    False otherwise
+    """
+    return sys.platform.startswith('win')
+
+def fixpath(path):
+
+    if iswinplatform():
+        return path.replace('/','\\')
+    return path
+
+def accumarray(arr, subs, func):
+    
+    uniqs = np.unique(subs)
+    outarr = np.zeros((len(uniqs)))
+    
+    for x in uniqs:
+        outarr[x] = func(arr[subs==x])
+   
+    return outarr
 
 import numpy as np
 
@@ -95,7 +122,7 @@ if isyahoo:
     # read in all files (aapl, goog, nflx)
     histdata = gethistdataforsymbols(symbols, proxydict=None)
 else:
-    histdata = readfiles('data/csv/*.csv')
+    histdata = readfiles(fixpath('data/csv/*.csv'))
 
 # create an ndarray from the allfiles sequence
 arr_files = np.array(histdata, dtype = float)
@@ -514,6 +541,8 @@ a.strides == b.strides
 import struct
 if type(a[0,0]) == np.int64:
     format_ = 'q'
+elif type(a[0,0]) == np.int32:
+    format_ = 'i'
 else:
     format_ = 'd'
 
@@ -551,9 +580,8 @@ struct.unpack(format_, a.data[rowpos : colpos])
 #such as arr['x'] and arr['y']. Record arrays allow the fields to be 
 #accessed as members of the array, using arr.x and arr.y.
 
-
 # create sql 
-def createtable(path='data/sqlite/histdatadb'):
+def sqlcreatetable(path=fixpath('data/sqlite/histdatadb')):
     import sqlite3
     conn = sqlite3.connect(path)
     cur = conn.cursor()
@@ -569,7 +597,7 @@ def createtable(path='data/sqlite/histdatadb'):
     conn.commit()
     conn.close()
 
-def populatedata(files='data/csv/*.csv', path='data/sqlite/histdatadb'):
+def sqlpopulatedata(files=fixpath('data/csv/*.csv'), path=fixpath('data/sqlite/histdatadb')):
     import sqlite3
     conn = sqlite3.connect(path)
 
@@ -599,7 +627,7 @@ def populatedata(files='data/csv/*.csv', path='data/sqlite/histdatadb'):
         files_ = glob.glob(files)
         
         histdata = readfiles(files)
-        syms = [x.split("/")[-1].split(".")[0] for x in files_]
+        syms = [x.split(os.sep)[-1].split(".")[0] for x in files_]
         symhistdata = zip(syms, histdata)
         
         for (s, hs) in symhistdata:
@@ -610,7 +638,7 @@ def populatedata(files='data/csv/*.csv', path='data/sqlite/histdatadb'):
     finally:
         conn.close()
 
-def select(sqlcmd="select * from prices", path='data/sqlite/histdatadb'):
+def sqlquery(sqlcmd="select * from prices", path=fixpath('data/sqlite/histdatadb')):
     import sqlite3
     conn = sqlite3.connect(path)
     try:
@@ -619,12 +647,70 @@ def select(sqlcmd="select * from prices", path='data/sqlite/histdatadb'):
             yield row
     finally:
         conn.close()
-    return xs
+
+def recpopulate(files=fixpath('data/csv/*.csv')):
+
+    import glob
+
+    files_ = glob.glob(files)
+        
+    histdata = readfiles(files)
+
+    syms = [x.split(os.sep)[-1].split(".")[0] for x in files_]
+
+    symhistdata = zip(syms, histdata)
+    xs = []
+    for (s, hs) in symhistdata:
+        for h in hs:
+            h.insert(1, s)
+            if h == None:
+                continue
+            xs.append(tuple(h))
+
+    adtype = np.dtype([ ('date', float)
+                    ,('sym', '|S4')
+                    ,('open', float)
+                    ,('high', float)
+                    ,('low', float)
+                    ,('close', float)
+                    ,('volume', int)
+                    ,('adjclose', float)])
+
+    return np.array(xs, dtype=adtype).view(np.recarray)
+
+rec_arr = recpopulate()
+
+import matplotlib.mlab as mlab
+
+# groupby
+recnumrecs = mlab.rec_groupby(rec_arr, ('sym',), (('sym', len, 'symcount'), ))
+sqlnumrecs = sqlquery('select sym, count(1) from prices group by sym')
+
+sqlavgs = sqlquery('select sym, avg(open), avg(high), avg(low), avg(close),\
+                        avg(volume), avg(adjclose) from prices group by sym')
+recavgs = mlab.rec_groupby(rec_arr, ('sym', ), (('open', np.average, 'avgopen')
+                                                    ,('high', np.average, 'avghigh')
+                                                    ,('low', np.average, 'avglow')
+                                                    ,('close', np.average, 'avgclose')
+                                                    ,('volume', np.average, 'avgvolume')
+                                                    ,('adjclose', np.average, 'avgadjclose')))
+
+# sort
+sqlsort = sqlquery('select * from prices order by sym, volume, close')
+sortidx = np.lexsort([rec_arr.close, rec_arr.volume, rec_arr.sym])
+sorted_rec_arr = rec_arr[sortidx]
 
 
+# filtering
+
+sqlfilter1 = sqlquery('select * from prices where close > 250 and close < 375')
+recfilter1 = rec_arr[(rec_arr.close > 250) & (rec_arr.close < 375)]
 
 
+#joins
 
 
+# union (rec_append_fields)
 
 
+#struct.unpack('', rec_arr.data[0:56])
