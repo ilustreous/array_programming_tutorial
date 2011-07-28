@@ -1,0 +1,272 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Setup python &mdash; bactest_workflow v1.0 documentation</title>
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="Search within bactest_workflow v1.0 documentation"
+          href="_static/opensearch.xml"/>
+    <link rel="top" title="bactest_workflow v1.0 documentation" href="index.html" />
+    <link rel="up" title="Tutorials" href="tutorial.html" />
+    <link rel="prev" title="Tutorials" href="tutorial.html" />
+ 
+<style type="text/css">
+  table.right { float: right; margin-left: 20px; }
+  table.right td { border: 1px solid #ccc; }
+</style>
+
+  </head>
+  <body>
+<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+<!-- <img src="_static/workflow.logo.png" alt="Bt Workflow logo" /> -->
+</div>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="tutorial.html" title="Tutorials"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Python Class</a>&nbsp;|&nbsp;</li>
+        <li><a href="contents.html">Documentation</a>
+          &raquo;</li>
+
+          <li><a href="tutorial.html" accesskey="U">Tutorials</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="contents.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Setup python</a><ul>
+<li><a class="reference internal" href="#steps">Steps</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#troubleshooting">Troubleshooting</a></li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="tutorial.html"
+                        title="previous chapter">Tutorials</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/pythonsetup.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="setup-python">
+<span id="pythonsetup"></span><h1>Setup python<a class="headerlink" href="#setup-python" title="Permalink to this headline">¶</a></h1>
+<p>Show users how to target a specific windows python toolchain.
+We&#8217;ll be using windows since everyone either has a windows 32
+or 64 bit system on hand.</p>
+<div class="section" id="steps">
+<h2>Steps<a class="headerlink" href="#steps" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic">
+<li><p class="first">Open command prompt</p>
+</li>
+<li><p class="first">Map K: to \\susq\prod\bal\windevtools:</p>
+<div class="highlight-rst"><div class="highlight"><pre>&gt; net use K: \\susq\prod\bal\windevtools
+</pre></div>
+</div>
+<p>If you don&#8217;t already have K: mapped then when you are finished
+it should look something like this:</p>
+<a class="reference internal image-reference" href="_images/netuse2.png"><img alt="_images/netuse2.png" src="_images/netuse2.png" /></a>
+<p>If you get this error:</p>
+<div class="highlight-rst"><div class="highlight"><pre>&quot;The local device name is already in use&quot;
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="_images/netuse.problem2.png"><img alt="_images/netuse.problem2.png" src="_images/netuse.problem2.png" /></a>
+<p>You&#8217;ll need to delete the mapping to K first
+and then try mapping it again:</p>
+<div class="highlight-rst"><div class="highlight"><pre>&gt; net use K: /delete
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="_images/netuse.delete2.png"><img alt="_images/netuse.delete2.png" src="_images/netuse.delete2.png" /></a>
+</li>
+<li><p class="first">Depending upon your system copy the 32bit or 64bit .bat file to your
+current working directory. This bat file will setup the environment
+variables that will point the python distro prebuilt for your system:</p>
+<div class="highlight-rst"><div class="highlight"><pre>&gt; copy H:\transfer\pyclass\win32pysetup.bat .
+or
+&gt; copy H:\transfer\pyclass\win64pysetup.bat .
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="_images/copybat2.png"><img alt="_images/copybat2.png" src="_images/copybat2.png" /></a>
+</li>
+<li><p class="first">Run the .bat file:</p>
+<div class="highlight-rst"><div class="highlight"><pre>&gt; win32pysetup.bat [Enter]
+or
+&gt; win64pysetup.bat [Enter]
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="_images/runthebat2.png"><img alt="_images/runthebat2.png" src="_images/runthebat2.png" /></a>
+</li>
+<li><p class="first">Start ipython.</p>
+<div class="highlight-rst"><div class="highlight"><pre>&gt; ipython -pylab -p sh
+</pre></div>
+</div>
+<p>You should see this at the ipython prompt</p>
+<a class="reference internal image-reference" href="_images/ipython2.png"><img alt="_images/ipython2.png" src="_images/ipython2.png" /></a>
+</li>
+<li><p class="first">Import these modules:</p>
+<div class="highlight-rst"><div class="highlight"><pre>import numpy as np
+import scipy as sp
+import tables as tbl
+import sqlite3
+import datetime
+import urllib
+import time
+import glob
+import matplotlib.pyplot as plt
+import struct
+import glob
+</pre></div>
+</div>
+</li>
+<li><p class="first">Plot some data:</p>
+<div class="highlight-rst"><div class="highlight"><pre>plot(np.array([1,2,3,4]))
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="_images/plot2.png"><img alt="_images/plot2.png" src="_images/plot2.png" /></a>
+<p>If you started ipython with the <strong>-pylab</strong> flag then the <strong>plot</strong>
+function should be in your global namespace.</p>
+<p>If you started ipython without <strong>-pylab</strong> then after you import pyplot:</p>
+<div class="highlight-rst"><div class="highlight"><pre>&gt;&gt; import matplotlib.pypolt as plt
+</pre></div>
+</div>
+<p>then you can use pyplot to plot the graph too:</p>
+<div class="highlight-rst"><div class="highlight"><pre>&gt;&gt; plt.plot(np.array([1,2,3,4]))
+&gt;&gt; plot.show()
+</pre></div>
+</div>
+</li>
+<li><p class="first">If Steps 6 and 7 run fine then you&#8217;re setup for the class. If not please email
+<a class="reference external" href="mailto:joseph&#46;ilustre&#37;&#52;&#48;sig&#46;com">me</a> and we&#8217;ll try to work it out 1-on-1.</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="section" id="troubleshooting">
+<h1>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permalink to this headline">¶</a></h1>
+<ol class="arabic">
+<li><p class="first">Some people have been getting this error:</p>
+<div class="highlight-rst"><div class="highlight"><pre>global MatplotlibShell = &lt;class &#39;IPython.Shell.MatplotlibShell&#39;&gt;
+   1107         _load_pylab(self.IP.user_ns)
+   1108
+   1109 class IPShellMatplotlibGTK(IPShellGTK):
+   1110     &quot;&quot;&quot;Subclass IPShellGTK with MatplotlibMTShell as the internal shell.
+
+   1111
+   1112     Multi-threaded class, meant for the GTK* backends.&quot;&quot;&quot;
+   1113
+   1114     def __init__(self,argv=None,user_ns=None,user_global_ns=None,debug=1
+):
+   1115         IPShellGTK.__init__(self,argv,user_ns,user_global_ns,debug,
+   1116                             shell_class=MatplotlibMTShell)
+   1117         _load_pylab(self.IP.user_ns)
+   1118
+   1119 class IPShellMatplotlibWX(IPShellWX):
+   1120     &quot;&quot;&quot;Subclass IPShellWX with MatplotlibMTShell as the internal shell.
+   1121
+
+K:\Toolchains\Windows7\X64\sig1\Python-2.7.1\lib\site-packages\IPython\Shell.py
+in __init__(self=&lt;IPython.Shell.IPShellMatplotlib instance&gt;, argv=None, user_ns=
+None, user_global_ns=None, debug=1, shell_class=&lt;class &#39;IPython.Shell.Matplotlib
+Shell&#39;&gt;)
+     58 # Default timeout for waiting for multithreaded shells (in seconds)
+     59 GUI_TIMEOUT = 10
+     60
+     61 #-----------------------------------------------------------------------
+------
+</pre></div>
+</div>
+<p>Some issue with multithreads and matplotlib. Try these steps to avoid it.</p>
+<ul>
+<li><p class="first">start ipython without the flags &#8220;ipython&#8221; instead of &#8220;ipython -pylab -p sh&#8221;:</p>
+<div class="highlight-rst"><div class="highlight"><pre>&gt; ipython
+</pre></div>
+</div>
+</li>
+<li><p class="first">Then in ipython run this:</p>
+<div class="highlight-rst"><div class="highlight"><pre>import numpy as np
+import matplotlib.pyplot as plt
+plt.plot(np.array([1,2,3,4]))
+plt.show()
+</pre></div>
+</div>
+</li>
+</ul>
+</li>
+</ol>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="tutorial.html" title="Tutorials"
+             >previous</a> |</li>
+        <li><a href="index.html">Python Class</a>&nbsp;|&nbsp;</li>
+        <li><a href="contents.html">Documentation</a>
+          &raquo;</li>
+
+          <li><a href="tutorial.html" >Tutorials</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Joseph Ilustre.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>

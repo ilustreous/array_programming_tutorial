@@ -1,0 +1,9 @@
+set PATH=c:\VS9\VC\BIN;c:\Windows\Microsoft.NET\Framework\v3.5;c:\Windows\Microsoft.NET\Framework\v2.0.50727;c:\VS9\VC\VCPackages;c:\VS9\Common7\IDE;c:\VS9\Common7\Tools;c:\VS9\Common7\Tools\bin;C:\oracle\product\10.2.0\client_2\bin;K:\Toolchains\WindowsXP\X86\sig1\Python-2.7.1;K:\Toolchains\WindowsXP\X86\sig1\Python-2.7.1\Scripts;K:\Toolchains\WindowsXP\X86\sig1\Python-2.7.1\DLLs;K:\Toolchains\WindowsXP\X86\sig1\GTK-2.22\bin;K:\Toolchains\WindowsXP\X86\sig1\openssl-1.0.0d\bin;K:\Toolchains\WindowsXP\X86\sig1\hdf5-1.8.5p1\dll;K:\Toolchains\WindowsXP\X86\sig1\MySQL-5.1.56\bin;K:\Toolchains\WindowsXP\X86\sig1\qt-4.7.1\bin;K:\Toolchains\WindowsXP\X86\sig1\graphviz-2.26.3\bin;K:\Toolchains\WindowsXP\X86\sig1\bin;C:\Program Files\Microsoft SDKs\Windows\v6.0A\bin;L:\Sde\Bin;C:\Windows\System32;%PATH%
+
+set INCLUDE=c:\VS9\VC\ATLMFC\INCLUDE;c:\VS9\VC\INCLUDE;C:\Program Files\Microsoft SDKs\Windows\v6.0A\Include;%INCLUDE%
+
+set LIB=c:\VS9\VC\ATLMFC\LIB;c:\VS9\VC\LIB;C:\Program Files\Microsoft SDKs\Windows\v6.0A\Lib;%LIB%
+ 
+set PKG_CONFIG_PATH=K:\Toolchains\WindowsXP\X86\sig1\GTK-2.22\lib\pkgconfig;K:\Toolchains\WindowsXP\X86\sig1\Python-2.7.1\Lib\pkgconfig;%PKG_CONFIG_PATH%
+
+set PYTHONPATH=K:\Toolchains\WindowsXP\X86\sig1\Python-2.7.1\Lib;K:\Toolchains\WindowsXP\X86\sig1\Python-2.7.1\DLLs;K:\Toolchains\WindowsXP\X86\sig1\Python-2.7.1\Lib\lib-tk;%PYTHONPATH%

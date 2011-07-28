@@ -1,0 +1,4 @@
+. ~/virtual_pythons/jpython/bin/activate
+cd /eot/eot_sata3/scratch/ilustre/ws/ilustre_workflow_sphinx/sphinxdoc/content
+make html .
+sphinx-build . ~/public_html

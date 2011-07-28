@@ -1,0 +1,154 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Pull down the workflow source code &mdash; bactest_workflow v1.0 documentation</title>
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="Search within bactest_workflow v1.0 documentation"
+          href="_static/opensearch.xml"/>
+    <link rel="top" title="bactest_workflow v1.0 documentation" href="index.html" />
+    <link rel="next" title="Spin up workflow" href="running.html" />
+    <link rel="prev" title="Workflow documentation contents" href="contents.html" />
+ 
+<style type="text/css">
+  table.right { float: right; margin-left: 20px; }
+  table.right td { border: 1px solid #ccc; }
+</style>
+
+  </head>
+  <body>
+<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+<!-- <img src="_static/workflow.logo.png" alt="Bt Workflow logo" /> -->
+</div>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="running.html" title="Spin up workflow"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="contents.html" title="Workflow documentation contents"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Bt Workflow Home</a>&nbsp;|&nbsp;</li>
+        <li><a href="contents.html">Documentation</a>
+          &raquo;</li>
+ 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="contents.html"
+                        title="previous chapter">Workflow documentation contents</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="running.html"
+                        title="next chapter">Spin up workflow</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/depot.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="pull-down-the-workflow-source-code">
+<span id="depot"></span><h1>Pull down the workflow source code<a class="headerlink" href="#pull-down-the-workflow-source-code" title="Permalink to this headline">¶</a></h1>
+<ol class="arabic">
+<li><p class="first">Using p4v, copy <em>ilustre_workflow_main</em>. You can find it by searching for <strong>Owner</strong> <em>ilustre</em> from the workspace view.</p>
+<a class="reference internal image-reference" href="_images/copy.p4.png"><img alt="_images/copy.p4.png" src="_images/copy.p4.png" style="width: 458.5px; height: 335.3px;" /></a>
+</li>
+<li><p class="first">Give it a name, i.e. <em>ilustre_workflow_tutorial</em></p>
+<a class="reference internal image-reference" href="_images/dialog.copy.p4.png"><img alt="_images/dialog.copy.p4.png" src="_images/dialog.copy.p4.png" style="width: 154.0px; height: 93.8px;" /></a>
+</li>
+<li><p class="first">Fill out the necessary fields</p>
+<a class="reference internal image-reference" href="_images/new.workspace.png"><img alt="_images/new.workspace.png" src="_images/new.workspace.png" style="width: 382.2px; height: 346.5px;" /></a>
+<ol class="loweralpha">
+<li><p class="first"><strong>Host</strong> - keep empty</p>
+</li>
+<li><p class="first"><strong>Root</strong> - if you&#8217;re on windows keep all workflows on <tt class="docutils literal"><span class="pre">\\susq\eot\sotbktst\scratch\{username}\ws\{name_of_workspace}</span></tt>
+i. on linux use <tt class="docutils literal"><span class="pre">/eot/sotbktst/scratch/{usrname}/ws/name_of_workspace</span></tt></p>
+</li>
+<li><p class="first"><strong>LineEnd</strong> - share</p>
+</li>
+<li><p class="first"><strong>View</strong> - make sure it looks like this:</p>
+<div class="highlight-python"><pre>//Depot/Source/SOT/Workflow/Main/... //{name_of_workspace}/...
+//Depot/Source/SOT/Matlab/... //{name_of_workspace}/matlab/...
+//Depot/Source/SOT/Python/utilities/... //{name_of_workspace}/btutils/...</pre>
+</div>
+</li>
+</ol>
+</li>
+</ol>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="running.html" title="Spin up workflow"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="contents.html" title="Workflow documentation contents"
+             >previous</a> |</li>
+        <li><a href="index.html">Bt Workflow Home</a>&nbsp;|&nbsp;</li>
+        <li><a href="contents.html">Documentation</a>
+          &raquo;</li>
+ 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Joseph Ilustre.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>

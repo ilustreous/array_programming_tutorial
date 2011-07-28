@@ -1,0 +1,68 @@
+.. highlight:: rst
+
+.. _running:
+
+****************
+Spin up workflow
+****************
+
+This document is meant to give a brief tutorial on using the workflow inside of ipython.
+
+
+cd to workspace
+===============
+
+*cd* to your workspace tree using a command terminal: 
+
+windows: ``\\susq\eot\sotbktst\scratch\{username}\ws\{name_of_workspace}``
+
+linux: ``/eot/sotbktst/scratch/{usrname}/ws/name_of_workspace``
+
+|more| If you haven't pulled down the source code please see vist the :ref:`depot` tutorial.
+
+
+Source settings
+===============
+
+Run the command (this should be run everytime you want to use workflow)::
+
+    $ . workflow.setup.sh
+
+or if in windows::
+
+    > workflow.setup.bat
+
+
+running those scripts will setup the correct paths for sigtoolchain, python and condor.
+
+Run ipython/spyder
+==================
+
+Run this command to start up ipython::
+
+    $ ipython -pylab -p btsh
+
+
+or in windows start up spyder::
+
+   > spyder
+
+
+Spyder is a scientific python development environment, akin to matlab (but free). 
+This will be the tool to use while on windows. It has an embedded console that
+runs ipython, an advanced editor, a history of commands and much more.
+You can check out more about it here: http://packages.python.org/spyder/
+
+|more| :ref:`spydersetup` for the workflow.
+
+
+
+
+
+
+
+
+
+.. |more| image:: _static/more.png
+          :align: middle
+          :alt: more info

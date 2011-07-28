@@ -1,0 +1,40 @@
+.. _workflowbasics:
+
+***************
+Workflow Basics
+***************
+
+This tutorial will show you how to
+run, generate, execute and check 
+your workflow.
+
+This is from the perspective of 
+running a workflow from linux.
+
+|more| Run through this tutorial to spin up ipython: :ref:`running`
+
+
+Run a workflowscript
+====================
+
+We will be using 
+
+Check dependencies
+==================
+
+Generate files
+==============
+
+Execute on condor 
+=================
+
+Watch progress
+==============
+
+
+
+.. |more| image:: _static/more.png
+          :align: middle
+          :alt: more info
+
+

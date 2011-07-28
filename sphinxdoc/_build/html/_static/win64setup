@@ -1,0 +1,4 @@
+set PATH=C:\oracle\product\11.2.0\client_2\bin;K:\Toolchains\Windows7\X64\sig1\Python-2.7.1;K:\Toolchains\Windows7\X64\sig1\Python-2.7.1\Scripts;K:\Toolchains\Windows7\X64\sig1\Python-2.7.1\DLLs;K:\Toolchains\Windows7\X64\sig1\GTK-2.22\bin;K:\Toolchains\Windows7\X64\sig1\hdf5-1.8.5p1\dll;K:\Toolchains\Windows7\X64\sig1\MKL-10.3.2.154\ComposerXE-2011\redist\intel64\mkl;K:\Toolchains\Windows7\X64\sig1\MKL-10.3.2.154\ComposerXE-2011\redist\intel64\compiler;K:\Toolchains\Windows7\X64\sig1\MySQL-5.1.56\bin;K:\Toolchains\Windows7\X64\sig1\qt-4.7.1\bin;K:\Toolchains\Windows7\X64\sig1\bin;I:\Perl5.8.8.817\bin;L:\Sde\Bin;%PATH%
+
+
+set PYTHONPATH=K:\Toolchains\Windows7\X64\sig1\Python-2.7.1\Lib;K:\Toolchains\Windows7\X64\sig1\Python-2.7.1\DLLs;K:\Toolchains\Windows7\X64\sig1\Python-2.7.1\Lib\lib-tk;%PYTHONPATH%

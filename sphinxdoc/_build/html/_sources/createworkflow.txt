@@ -1,0 +1,127 @@
+.. _createworkflow.rt:
+
+
+*****************************
+Create your very own workflow
+*****************************
+
+This tutorial will show you
+how to create a generic workflow.
+
+The workflow will do the following:
+
+1. Query a mysql database for trades
+   over a list of days.
+
+2. Merge those trades into one file.
+
+The workflow is a very generic tool
+that will be able to run arbitrary
+scripts. The helper scripts are:
+
+1. :file:`db2csvpp.py`
+2. :file:`mergefiles.py` 
+
+These are found in :file:`/eot/sotbktst/scratch/{usrname}/ws/name_of_workspace/workflow`
+
+We'll run the these scripts manually and then we'll execute on the workflow.
+
+Manual run
+==========
+cd to your workspace::
+
+        $ cd /eot/sotbktst/scratch/usrname/ws/name_of_workspace
+
+Source your settings::
+
+        $ . workflow.setup.sh
+
+Run the following to get the trades::
+
+        $ python workflow/db2csvpp.py -o test.csvpp -t vw_cboe_aim_match -s btsotsqlbal810 -d path_a -u soqsuser -p susersoq --sql='select * from vw_cboe_aim_match where tradedate=20110517' --fetch_all --split_interval=10000
+        $ python workflow/db2csvpp.py -o test.csvpp -t vw_cboe_aim_match -s btsotsqlbal810 -d path_a -u soqsuser -p susersoq --sql='select * from vw_cboe_aim_match where tradedate=20110518' --fetch_all --split_interval=10000
+
+Those two commands will create 2 files in a sub directory 
+called ``split`` in the current working directory
+and it will contain all the aim trades for those two days.
+
+Run the following to merge the trades::
+
+       $ python workflow/mergefiles.py --input_file=split/*.* --output_file=merged.trades.csvpp
+
+The purpose of this exercise is two fold:
+
+1. Makes sure that our helper scripts run successfully
+2. Gain the understanding that the workflow is running the
+   same scripts but having them execute over the cluster.
+   There is no special incantation needed to
+   run one of your own scripts on the cluster, just the
+   workflow module.
+
+
+Workflow run
+============
+
+The workflow wraps your script into a shell script and then
+it schedules it on the cluster. The following will create
+a script that will get all the trades from the database
+in parallel and then run the merge script after all the data
+from the db has been extracted.
+
+Workflow Script
+~~~~~~~~~~~~~~~
+
+1. Go to your workflow's study directory::
+   
+        $ cd /eot/sotbktst/scratch/{usrname}/ws/name_of_workspace/studies
+
+2. Create a file called ``workflowscript.tutorial.py``::
+   
+        $ vim workflowscript.tutorial.py
+
+   You can use your favorite editor for this, you don't `need` to use vi.
+
+3. Import the workflow module::
+   
+        import workflow as wf
+
+4. Create the root node of your workflow::
+   
+        root = wf.Job('tutorial', None)
+
+5. The Node object has 2 attributes that you must specify, path and depotPath.
+   path is the location to where you want to store your results
+   depotPath is the location to where your :file'`workflow` folder is
+   in your workspace::
+   
+        root.path = wf.path2Platform('/eot/eot_sata3/scratch/ilustre/ws/ilustre_workflow_tutorial/studies/ilustre/results')
+        root.depothPath = wf.path2Platform('/eot/eot_sata3/scratch/ilustre/ws/ilustre_workflow_tutorial/workflow')
+
+6. The method initCondorLogReader() specifies the location
+   of where condor writes its log. Generally, if you have
+   'Day' nodes you would initialize it at the day level.
+   But for this tutorial we'll initialize it on root::
+   
+        root.initCondorLogReader()
+
+7. The method copyScriptOnGen() copies itself to the 
+   results directory.  It's good practice to always 
+   do this. It helps when you need to return to the
+   study results after a while and see what you did
+   to create it::
+   
+        root.copyScriptOnGen()
+
+8. We now need a list of dates to iterate over::
+
+        days = wf.TradingDateList('20110517-20110519')
+
+
+
+
+
+   
+
+   
+   
+

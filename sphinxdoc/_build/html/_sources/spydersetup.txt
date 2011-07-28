@@ -1,0 +1,45 @@
+.. highlight:: rst
+
+.. _spydersetup:
+
+************
+Setup Spyder
+************
+
+|more| To bring up spyder run though this tutorial, :ref:`running`
+
+
+Preferences
+===========
+
+Go to Tools -> Preferences to open up the Preferences pane.
+
+Click on **Console** in the list on the left side.
+
+Click on **External Modules** tab.
+
+
+Ipython Options
+~~~~~~~~~~~~~~~
+
+Replace the line with "-pylab"
+
+Matplotlib
+~~~~~~~~~~
+
+Replace the line with "WxAgg"
+
+
+Example
+~~~~~~~
+
+The pane should look something like this:
+
+.. image:: _static/spyder.preference.png
+   :width: 705px
+   :height: 682px
+   :scale: 70
+
+.. |more| image:: _static/more.png
+          :align: middle
+          :alt: more info

@@ -1,0 +1,259 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Look at your workflow results &mdash; bactest_workflow v1.0 documentation</title>
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="Search within bactest_workflow v1.0 documentation"
+          href="_static/opensearch.xml"/>
+    <link rel="top" title="bactest_workflow v1.0 documentation" href="index.html" />
+    <link rel="up" title="Tutorials" href="tutorial.html" />
+    <link rel="next" title="Test" href="ipythontest.html" />
+    <link rel="prev" title="Workflow Basics" href="workflowbasics.html" />
+ 
+<style type="text/css">
+  table.right { float: right; margin-left: 20px; }
+  table.right td { border: 1px solid #ccc; }
+</style>
+
+  </head>
+  <body>
+<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+<!-- <img src="_static/workflow.logo.png" alt="Bt Workflow logo" /> -->
+</div>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="ipythontest.html" title="Test"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="workflowbasics.html" title="Workflow Basics"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Bt Workflow Home</a>&nbsp;|&nbsp;</li>
+        <li><a href="contents.html">Documentation</a>
+          &raquo;</li>
+
+          <li><a href="tutorial.html" accesskey="U">Tutorials</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="contents.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Look at your workflow results</a><ul>
+<li><a class="reference internal" href="#manually-looking-at-data">Manually looking at data</a></li>
+<li><a class="reference internal" href="#adding-data-jobs-to-your-workflow">Adding data jobs to your workflow</a></li>
+<li><a class="reference internal" href="#more-functions">More functions</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="workflowbasics.html"
+                        title="previous chapter">Workflow Basics</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="ipythontest.html"
+                        title="next chapter">Test</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/workflowresults.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="look-at-your-workflow-results">
+<span id="workflowresults-rt"></span><h1>Look at your workflow results<a class="headerlink" href="#look-at-your-workflow-results" title="Permalink to this headline">¶</a></h1>
+<p>This tutorial will show you
+how to look at results produced from a workflow</p>
+<p>This assumes you already have a good understanding of how to run a workflow script</p>
+<div class="section" id="manually-looking-at-data">
+<h2>Manually looking at data<a class="headerlink" href="#manually-looking-at-data" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic">
+<li><p class="first">Open up an ipython terminal:</p>
+<div class="highlight-python"><pre>$ ipython -pylab</pre>
+</div>
+</li>
+<li><p class="first">Run your workflow:</p>
+<div class="highlight-python"><pre>run -i studies/paryani/sample_B2_two.py</pre>
+</div>
+</li>
+<li><p class="first">Imprt pnltools and construct the workflow data object:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">workflow.pnltools</span> <span class="kn">as</span> <span class="nn">pnl</span>
+<span class="n">data</span><span class="o">=</span><span class="n">pnl</span><span class="o">.</span><span class="n">WorkflowData</span><span class="p">(</span><span class="n">flow</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+</ol>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">flow is the name of the workflow object in studies/paryani/sample_B2_two.py.</p>
+</div>
+<ol class="arabic" start="4">
+<li><p class="first">(Optional) If your datasets failed to load (if the save_results_to_h5 job failed), then you can manually load the data with:</p>
+<div class="highlight-python"><pre>    data=pnl.WorkflowData(flow)
+Trial: /windows/t_001, not found in h5 file
+Trial: /windows/t_002, not found in h5 file
+    data.loadFromLogFiles()</pre>
+</div>
+</li>
+<li><p class="first">Data is laid out by trial name. See <a class="reference external" href="http://techwiki/twiki/bin/view/EOTGroup/LookingAtResults">resultsTwiki</a> for a summary of the fields.:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">data</span><span class="o">.</span><span class="n">t_001</span><span class="o">.</span><span class="n">trades</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Selecting data is very similar to Matlab:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">data</span><span class="o">.</span><span class="n">t_001</span><span class="o">.</span><span class="n">trades</span><span class="p">[</span><span class="n">data</span><span class="o">.</span><span class="n">t_001</span><span class="o">.</span><span class="n">trades</span><span class="o">.</span><span class="n">price</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">]</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">If you want to persist some data into h5, it&#8217;s very easy:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">bigTrades</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">t_001</span><span class="o">.</span><span class="n">trades</span><span class="p">[</span><span class="n">data</span><span class="o">.</span><span class="n">t_001</span><span class="o">.</span><span class="n">trades</span><span class="o">.</span><span class="n">price</span> <span class="o">&gt;</span> <span class="mi">100</span><span class="p">]</span>
+<span class="n">data</span><span class="o">.</span><span class="n">addDataset</span><span class="p">(</span><span class="s">&#39;bigTrades&#39;</span><span class="p">,</span> <span class="n">bigTrades</span><span class="p">)</span>
+<span class="n">data</span><span class="o">.</span><span class="n">saveToH5</span><span class="p">()</span>
+</pre></div>
+</div>
+</li>
+</ol>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>Now there is a table called bigTrades as a child of flow.name in the hdf5 file.</p>
+<ul class="last simple">
+<li>By default, hdf5 files are stored in each trial&#8217;s results directory, ie. studies/paryani/sample_b2/windows/t_001/results/</li>
+<li>When you call data.saveToH5(), the result goes into the workflow&#8217;s result directory studies/paryani/sample_b2/windows/results/</li>
+<li>If you want to save to a specific location, call data.saveToH5(&#8216;/path/to/myfile.h5&#8217;)</li>
+</ul>
+</div>
+</div>
+<div class="section" id="adding-data-jobs-to-your-workflow">
+<h2>Adding data jobs to your workflow<a class="headerlink" href="#adding-data-jobs-to-your-workflow" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic">
+<li><p class="first">Open up your workflow script:</p>
+<div class="highlight-python"><pre>$ emacs studies/paryani/sample_B2_two.py</pre>
+</div>
+</li>
+<li><p class="first">Add a new function definition at the top of the file that will do all your summaries:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">mySummary</span><span class="p">(</span><span class="n">flow</span><span class="p">):</span>
+    <span class="kn">import</span> <span class="nn">workflow.pnltools</span> <span class="kn">as</span> <span class="nn">pnl</span>
+    <span class="n">data</span><span class="o">=</span><span class="n">pnl</span><span class="o">.</span><span class="n">WorkflowData</span><span class="p">(</span><span class="n">flow</span><span class="p">)</span>
+    <span class="n">bigTrades</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">t_001</span><span class="o">.</span><span class="n">trades</span><span class="p">[</span><span class="n">data</span><span class="o">.</span><span class="n">t_001</span><span class="o">.</span><span class="n">trades</span><span class="o">.</span><span class="n">price</span> <span class="o">&gt;</span> <span class="mi">100</span><span class="p">]</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">addDataset</span><span class="p">(</span><span class="s">&#39;bigTrades&#39;</span><span class="p">,</span> <span class="n">bigTrades</span><span class="p">)</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">saveToH5</span><span class="p">()</span>
+</pre></div>
+</div>
+</li>
+</ol>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Even though it&#8217;s bad style, you need to put all your imports you wish to use for this function inside the function definition</p>
+</div>
+<ol class="arabic" start="3">
+<li><p class="first">Now go to the bottom of you workflow and add a new PythonFunctionJob:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="o">...</span>
+<span class="n">flow</span><span class="o">.</span><span class="n">sync</span><span class="p">(</span><span class="s">&#39;sync&#39;</span><span class="p">)</span> <span class="c"># only add this if there is no sync already</span>
+<span class="n">funcJob</span> <span class="o">=</span> <span class="n">PythonFunctionJob</span><span class="p">(</span><span class="s">&#39;mySummaryFunc&#39;</span><span class="p">,</span> <span class="n">flow</span><span class="p">,</span> <span class="n">mySummary</span><span class="p">)</span>
+<span class="n">funcJob</span><span class="o">.</span><span class="n">addArgs</span><span class="p">(</span><span class="n">flow</span><span class="p">)</span>
+<span class="n">flow</span><span class="o">.</span><span class="n">doInOrder</span><span class="p">(</span><span class="n">funcJob</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Run your workflow as normal, and as a final job, your summaries will be run. The resulting hdf5 file will be under your workflow&#8217;s results folder.</p>
+</li>
+</ol>
+</div>
+<div class="section" id="more-functions">
+<h2>More functions<a class="headerlink" href="#more-functions" title="Permalink to this headline">¶</a></h2>
+<p>A function that will try and parse csv for you and add it to the dataset:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">data</span><span class="o">.</span><span class="n">parseAndAddDataset</span><span class="p">(</span><span class="s">&#39;/eot/sotbktst/scratch/paryani/workflow/studies/paryani/sample_b2/windows/t_001/20110118/00/log/00_Orders.20110118.txt&#39;</span><span class="p">,</span> <span class="s">&#39;newOrders&#39;</span><span class="p">,</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">)</span>
+<span class="n">data</span><span class="o">.</span><span class="n">saveToH5</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>A function for printing recarrays more cleanly:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">pnl</span><span class="o">.</span><span class="n">prettyPrintRec</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">t_001</span><span class="o">.</span><span class="n">trades</span><span class="p">[:</span><span class="mi">10</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>Do an MCJ style summary:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">pnl</span><span class="o">.</span><span class="n">summarizePnl</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">t_001</span><span class="o">.</span><span class="n">pnled_trades</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Save recarray to csv:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">mlab</span>
+<span class="n">mlab</span><span class="o">.</span><span class="n">rec2csv</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">t_001</span><span class="o">.</span><span class="n">pnled_trades</span><span class="p">,</span> <span class="s">&#39;tmp.csv&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="ipythontest.html" title="Test"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="workflowbasics.html" title="Workflow Basics"
+             >previous</a> |</li>
+        <li><a href="index.html">Bt Workflow Home</a>&nbsp;|&nbsp;</li>
+        <li><a href="contents.html">Documentation</a>
+          &raquo;</li>
+
+          <li><a href="tutorial.html" >Tutorials</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Joseph Ilustre.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>

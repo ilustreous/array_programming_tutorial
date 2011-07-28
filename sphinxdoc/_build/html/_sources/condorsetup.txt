@@ -1,0 +1,39 @@
+.. highlight:: rst
+
+.. _condorsetup:
+
+********************
+Initial Condor Setup
+********************
+
+Credentials
+============
+Our bt cluster is a mix of windows and linux machines.
+In order to run on windows machines you must store your
+nt credentials on btsotbal501 (windows machine).
+
+Using your nt username and password log into btsotbal501.
+
+Run this command in a terminal::
+    
+    > c:\condor\bin\condor_store_cred.exe add
+
+NT users will be asked to change their password every three months.
+After doing that, you need to reset your credentials on btsotbal501 too.
+
+
+Local Condor (Windows)
+======================
+
+To execute workflows on your local windows machine
+you need to have condor installed on your system.
+
+To install condor on your system please contact: `Allen Todd`_
+
+
+
+
+.. _Allen Todd: allen.todd@sig.com
+
+
+

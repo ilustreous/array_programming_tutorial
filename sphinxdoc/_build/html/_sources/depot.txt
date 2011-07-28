@@ -1,0 +1,41 @@
+.. _depot:
+
+**********************************
+Pull down the workflow source code
+**********************************
+
+
+1. Using p4v, copy *ilustre_workflow_main*. You can find it by searching for **Owner** *ilustre* from the workspace view.
+
+   .. image:: _static/copy.p4.png
+      :width: 655px
+      :height: 479px
+      :scale: 70
+
+2. Give it a name, i.e. *ilustre_workflow_tutorial*
+
+   .. image:: _static/dialog.copy.p4.png
+      :width: 220px
+      :height: 134px
+      :scale: 70
+
+3. Fill out the necessary fields
+
+   .. image:: _static/new.workspace.png
+      :width: 546px
+      :height: 495px
+      :scale: 70
+
+   a. **Host** - keep empty
+
+   b. **Root** - if you're on windows keep all workflows on ``\\susq\eot\sotbktst\scratch\{username}\ws\{name_of_workspace}`` 
+      i. on linux use ``/eot/sotbktst/scratch/{usrname}/ws/name_of_workspace``
+
+   c. **LineEnd** - share
+      
+   d. **View** - make sure it looks like this::
+
+        //Depot/Source/SOT/Workflow/Main/... //{name_of_workspace}/...
+        //Depot/Source/SOT/Matlab/... //{name_of_workspace}/matlab/...
+        //Depot/Source/SOT/Python/utilities/... //{name_of_workspace}/btutils/...
+ 

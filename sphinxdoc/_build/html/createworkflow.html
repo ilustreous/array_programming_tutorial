@@ -1,0 +1,251 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Create your very own workflow &mdash; bactest_workflow v1.0 documentation</title>
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="Search within bactest_workflow v1.0 documentation"
+          href="_static/opensearch.xml"/>
+    <link rel="top" title="bactest_workflow v1.0 documentation" href="index.html" />
+    <link rel="up" title="Tutorials" href="tutorial.html" />
+    <link rel="next" title="Workflow Basics" href="workflowbasics.html" />
+    <link rel="prev" title="Tutorials" href="tutorial.html" />
+ 
+<style type="text/css">
+  table.right { float: right; margin-left: 20px; }
+  table.right td { border: 1px solid #ccc; }
+</style>
+
+  </head>
+  <body>
+<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+<!-- <img src="_static/workflow.logo.png" alt="Bt Workflow logo" /> -->
+</div>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="workflowbasics.html" title="Workflow Basics"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="tutorial.html" title="Tutorials"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Bt Workflow Home</a>&nbsp;|&nbsp;</li>
+        <li><a href="contents.html">Documentation</a>
+          &raquo;</li>
+
+          <li><a href="tutorial.html" accesskey="U">Tutorials</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="contents.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Create your very own workflow</a><ul>
+<li><a class="reference internal" href="#manual-run">Manual run</a></li>
+<li><a class="reference internal" href="#workflow-run">Workflow run</a><ul>
+<li><a class="reference internal" href="#workflow-script">Workflow Script</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="tutorial.html"
+                        title="previous chapter">Tutorials</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="workflowbasics.html"
+                        title="next chapter">Workflow Basics</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/createworkflow.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="create-your-very-own-workflow">
+<span id="createworkflow-rt"></span><h1>Create your very own workflow<a class="headerlink" href="#create-your-very-own-workflow" title="Permalink to this headline">¶</a></h1>
+<p>This tutorial will show you
+how to create a generic workflow.</p>
+<p>The workflow will do the following:</p>
+<ol class="arabic simple">
+<li>Query a mysql database for trades
+over a list of days.</li>
+<li>Merge those trades into one file.</li>
+</ol>
+<p>The workflow is a very generic tool
+that will be able to run arbitrary
+scripts. The helper scripts are:</p>
+<ol class="arabic simple">
+<li><tt class="file docutils literal"><span class="pre">db2csvpp.py</span></tt></li>
+<li><tt class="file docutils literal"><span class="pre">mergefiles.py</span></tt></li>
+</ol>
+<p>These are found in <tt class="file docutils literal"><span class="pre">/eot/sotbktst/scratch/</span><em><span class="pre">usrname</span></em><span class="pre">/ws/name_of_workspace/workflow</span></tt></p>
+<p>We&#8217;ll run the these scripts manually and then we&#8217;ll execute on the workflow.</p>
+<div class="section" id="manual-run">
+<h2>Manual run<a class="headerlink" href="#manual-run" title="Permalink to this headline">¶</a></h2>
+<p>cd to your workspace:</p>
+<div class="highlight-python"><pre>$ cd /eot/sotbktst/scratch/usrname/ws/name_of_workspace</pre>
+</div>
+<p>Source your settings:</p>
+<div class="highlight-python"><pre>$ . workflow.setup.sh</pre>
+</div>
+<p>Run the following to get the trades:</p>
+<div class="highlight-python"><pre>$ python workflow/db2csvpp.py -o test.csvpp -t vw_cboe_aim_match -s btsotsqlbal810 -d path_a -u soqsuser -p susersoq --sql='select * from vw_cboe_aim_match where tradedate=20110517' --fetch_all --split_interval=10000
+$ python workflow/db2csvpp.py -o test.csvpp -t vw_cboe_aim_match -s btsotsqlbal810 -d path_a -u soqsuser -p susersoq --sql='select * from vw_cboe_aim_match where tradedate=20110518' --fetch_all --split_interval=10000</pre>
+</div>
+<p>Those two commands will create 2 files in a sub directory
+called <tt class="docutils literal"><span class="pre">split</span></tt> in the current working directory
+and it will contain all the aim trades for those two days.</p>
+<p>Run the following to merge the trades:</p>
+<div class="highlight-python"><pre>$ python workflow/mergefiles.py --input_file=split/*.* --output_file=merged.trades.csvpp</pre>
+</div>
+<p>The purpose of this exercise is two fold:</p>
+<ol class="arabic simple">
+<li>Makes sure that our helper scripts run successfully</li>
+<li>Gain the understanding that the workflow is running the
+same scripts but having them execute over the cluster.
+There is no special incantation needed to
+run one of your own scripts on the cluster, just the
+workflow module.</li>
+</ol>
+</div>
+<div class="section" id="workflow-run">
+<h2>Workflow run<a class="headerlink" href="#workflow-run" title="Permalink to this headline">¶</a></h2>
+<p>The workflow wraps your script into a shell script and then
+it schedules it on the cluster. The following will create
+a script that will get all the trades from the database
+in parallel and then run the merge script after all the data
+from the db has been extracted.</p>
+<div class="section" id="workflow-script">
+<h3>Workflow Script<a class="headerlink" href="#workflow-script" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic">
+<li><p class="first">Go to your workflow&#8217;s study directory:</p>
+<div class="highlight-python"><pre>$ cd /eot/sotbktst/scratch/{usrname}/ws/name_of_workspace/studies</pre>
+</div>
+</li>
+<li><p class="first">Create a file called <tt class="docutils literal"><span class="pre">workflowscript.tutorial.py</span></tt>:</p>
+<div class="highlight-python"><pre>$ vim workflowscript.tutorial.py</pre>
+</div>
+<p>You can use your favorite editor for this, you don&#8217;t <cite>need</cite> to use vi.</p>
+</li>
+<li><p class="first">Import the workflow module:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">workflow</span> <span class="kn">as</span> <span class="nn">wf</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Create the root node of your workflow:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">root</span> <span class="o">=</span> <span class="n">wf</span><span class="o">.</span><span class="n">Job</span><span class="p">(</span><span class="s">&#39;tutorial&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">The Node object has 2 attributes that you must specify, path and depotPath.
+path is the location to where you want to store your results
+depotPath is the location to where your :file&#8217;<cite>workflow</cite> folder is
+in your workspace:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">root</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">wf</span><span class="o">.</span><span class="n">path2Platform</span><span class="p">(</span><span class="s">&#39;/eot/eot_sata3/scratch/ilustre/ws/ilustre_workflow_tutorial/studies/ilustre/results&#39;</span><span class="p">)</span>
+<span class="n">root</span><span class="o">.</span><span class="n">depothPath</span> <span class="o">=</span> <span class="n">wf</span><span class="o">.</span><span class="n">path2Platform</span><span class="p">(</span><span class="s">&#39;/eot/eot_sata3/scratch/ilustre/ws/ilustre_workflow_tutorial/workflow&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">The method initCondorLogReader() specifies the location
+of where condor writes its log. Generally, if you have
+&#8216;Day&#8217; nodes you would initialize it at the day level.
+But for this tutorial we&#8217;ll initialize it on root:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">root</span><span class="o">.</span><span class="n">initCondorLogReader</span><span class="p">()</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">The method copyScriptOnGen() copies itself to the
+results directory.  It&#8217;s good practice to always
+do this. It helps when you need to return to the
+study results after a while and see what you did
+to create it:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">root</span><span class="o">.</span><span class="n">copyScriptOnGen</span><span class="p">()</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">We now need a list of dates to iterate over:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">days</span> <span class="o">=</span> <span class="n">wf</span><span class="o">.</span><span class="n">TradingDateList</span><span class="p">(</span><span class="s">&#39;20110517-20110519&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="workflowbasics.html" title="Workflow Basics"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="tutorial.html" title="Tutorials"
+             >previous</a> |</li>
+        <li><a href="index.html">Bt Workflow Home</a>&nbsp;|&nbsp;</li>
+        <li><a href="contents.html">Documentation</a>
+          &raquo;</li>
+
+          <li><a href="tutorial.html" >Tutorials</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Joseph Ilustre.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>

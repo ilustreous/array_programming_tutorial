@@ -1,0 +1,109 @@
+.. _workflowresults.rt:
+
+
+*****************************
+Look at your workflow results
+*****************************
+
+This tutorial will show you
+how to look at results produced from a workflow
+
+This assumes you already have a good understanding of how to run a workflow script
+
+Manually looking at data
+==========
+
+1. Open up an ipython terminal::
+
+        $ ipython -pylab
+
+2. Run your workflow::
+
+         run -i studies/paryani/sample_B2_two.py
+
+3. Imprt pnltools and construct the workflow data object::
+
+        import workflow.pnltools as pnl
+        data=pnl.WorkflowData(flow)
+        
+.. note:: flow is the name of the workflow object in studies/paryani/sample_B2_two.py.
+
+4. (Optional) If your datasets failed to load (if the save_results_to_h5 job failed), then you can manually load the data with::
+
+        data=pnl.WorkflowData(flow)
+    Trial: /windows/t_001, not found in h5 file
+    Trial: /windows/t_002, not found in h5 file
+        data.loadFromLogFiles()
+        
+5. Data is laid out by trial name. See resultsTwiki_ for a summary of the fields.::
+
+        data.t_001.trades
+        
+6. Selecting data is very similar to Matlab::
+
+        data.t_001.trades[data.t_001.trades.price > 1]
+        
+7. If you want to persist some data into h5, it's very easy::
+
+        bigTrades = data.t_001.trades[data.t_001.trades.price > 100]
+        data.addDataset('bigTrades', bigTrades)
+        data.saveToH5()
+        
+.. note:: Now there is a table called bigTrades as a child of flow.name in the hdf5 file.
+
+   - By default, hdf5 files are stored in each trial's results directory, ie. studies/paryani/sample_b2/windows/t_001/results/
+   - When you call data.saveToH5(), the result goes into the workflow's result directory studies/paryani/sample_b2/windows/results/
+   - If you want to save to a specific location, call data.saveToH5('/path/to/myfile.h5')
+
+   
+.. _resultsTwiki: http://techwiki/twiki/bin/view/EOTGroup/LookingAtResults
+
+
+Adding data jobs to your workflow
+==========
+
+1. Open up your workflow script::
+
+        $ emacs studies/paryani/sample_B2_two.py
+        
+2. Add a new function definition at the top of the file that will do all your summaries::
+
+        def mySummary(flow):
+            import workflow.pnltools as pnl
+            data=pnl.WorkflowData(flow)
+            bigTrades = data.t_001.trades[data.t_001.trades.price > 100]
+            data.addDataset('bigTrades', bigTrades)
+            data.saveToH5()
+
+.. note:: Even though it's bad style, you need to put all your imports you wish to use for this function inside the function definition
+
+3. Now go to the bottom of you workflow and add a new PythonFunctionJob::
+        
+        ...
+        flow.sync('sync') # only add this if there is no sync already
+        funcJob = PythonFunctionJob('mySummaryFunc', flow, mySummary)
+        funcJob.addArgs(flow)
+        flow.doInOrder(funcJob)
+        
+4. Run your workflow as normal, and as a final job, your summaries will be run. The resulting hdf5 file will be under your workflow's results folder.
+
+More functions
+==========
+
+A function that will try and parse csv for you and add it to the dataset::
+
+        data.parseAndAddDataset('/eot/sotbktst/scratch/paryani/workflow/studies/paryani/sample_b2/windows/t_001/20110118/00/log/00_Orders.20110118.txt', 'newOrders', '\t')
+        data.saveToH5()
+        
+A function for printing recarrays more cleanly::
+
+        pnl.prettyPrintRec(data.t_001.trades[:10])
+        
+Do an MCJ style summary::
+
+        pnl.summarizePnl(data.t_001.pnled_trades)
+        
+Save recarray to csv::
+        
+        from matplotlib import mlab
+        mlab.rec2csv(data.t_001.pnled_trades, 'tmp.csv')
