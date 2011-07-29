@@ -120,7 +120,7 @@ isyahoo = True
 symbols = np.array(['AAPL', 'GOOG', 'NFLX', 'SINA'], dtype=str)
 if isyahoo:
     # read in all files (aapl, goog, nflx)
-    histdata = gethistdataforsymbols(symbols, proxydict=None)
+    histdata = gethistdataforsymbols(symbols, proxydict=SUSQPROXY)
 else:
     histdata = readfiles(fixpath('data/csv/*.csv'))
 
@@ -579,6 +579,7 @@ struct.unpack(format_, a.data[rowpos : colpos])
 #Normally, these attributes are accessed using dictionary lookups 
 #such as arr['x'] and arr['y']. Record arrays allow the fields to be 
 #accessed as members of the array, using arr.x and arr.y.
+#it's like working with database structures but at a much higher velocity.
 
 # create sql 
 def sqlcreatetable(path=fixpath('data/sqlite/histdatadb')):
@@ -679,6 +680,7 @@ def recpopulate(files=fixpath('data/csv/*.csv')):
     return np.array(xs, dtype=adtype).view(np.recarray)
 
 rec_arr = recpopulate()
+struct.unpack('<d4s4did', rec_arr.data[0:56])
 
 import matplotlib.mlab as mlab
 
@@ -702,15 +704,57 @@ sorted_rec_arr = rec_arr[sortidx]
 
 
 # filtering
-
 sqlfilter1 = sqlquery('select * from prices where close > 250 and close < 375')
 recfilter1 = rec_arr[(rec_arr.close > 250) & (rec_arr.close < 375)]
 
-
 #joins
+simplejoin = """
+select * 
+  from
+(select * 
+   from  prices 
+  where sym = 'aapl') a
+,(select * 
+    from  prices 
+   where sym = 'goog')  b
+where a.date = b.date
+"""
+sqljoin = sqlquery(simplejoin)
 
+aapl = rec_arr[rec_arr.sym=='aapl']
+goog = rec_arr[rec_arr.sym=='goog']
+recjoin = mlab.rec_join(['date'], aapl, goog, jointype='inner')
 
 # union (rec_append_fields)
+simpleunion = """
+select * 
+  from prices 
+ where sym = 'aapl'
+union
+select * 
+  from  prices 
+ where sym = 'goog'
+order by sym, date desc
+"""
+sqlunion = sqlquery(simpleunion)
+
+from np.lib import recfunctions as recfunc
+recunion = recfunc.stack_arrays((aapl, goog)
+                                ,usemask=False
+                                ,asrecarray=True
+                                ,autoconvert=True)
+# sub selection
+simpleselection = "select close, volume from  prices where sym = 'aapl'"
+selected = sqlquery(simpleselection)
+recselect = rec_arr[['close', 'volume']]
 
 
-#struct.unpack('', rec_arr.data[0:56])
+# append fields
+
+# drop fields
+
+
+
+# showed the basics and I said it was faster in some cases
+# now i'll prove it to you
+# into to profiling 
