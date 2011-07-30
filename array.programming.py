@@ -1,8 +1,7 @@
 import sys
 import datetime
 import time
-import os
-
+import util
 
 DATE = 0
 OPEN = 1
@@ -11,198 +10,13 @@ LOW = 3
 CLOSE = 4
 VOLUME = 5
 ADJCLOSE = 6
-SUSQPROXY = {'http': 'http://http-proxy.susq.com:80'}
 
-def is32bit():
-    import platform
-    
-    return '32' in platform.architecture()[0]
-
-def epochsec2datetime(epochsec):
-
-    return datetime.datetime.fromtimestamp(epochsec)
-
-def testprices():
-    x = np.array([ 35.438,35.75 ,35.875 ,36.938 ,39.313 
-                  ,39.125 ,42.5 ,42.313 ,45.5 ,46.688 ,46.125 
-                  ,43.75 ,45.375 ,46.594 ,46.938 ,46.188 
-                  ,44.5 ,45.875 ,45.75 ,44.625 
-                  ,45 ,45.5 ,48.375 ,51 ,47.75])
-    y =           np.vstack([x,x])
-    prices = y.transpose()
-    return prices
-
-def iswinplatform():
-    """
-    Returns:
-    --------
-
-    True if you are running on windows platform
-    False otherwise
-    """
-    return sys.platform.startswith('win')
-
-def fixpath(path):
-
-    if iswinplatform():
-        return path.replace('/','\\')
-    return path
-
-def accumarray(arr, subs, func):
-    
-    uniqs = np.unique(subs)
-    outarr = np.zeros((len(uniqs)))
-    
-    for x in uniqs:
-        outarr[x] = func(arr[subs==x])
-   
-    return outarr
-
-def readfile(file_):
-    #header: Date,Open,High,Low,Close,Volume,Adj Close
-    import csv
-
-    sym = file_.split(os.sep)[-1].split(".")[0]
-
-    with open (file_, 'r') as fh:
-        reader = csv.reader(fh)
-        reader.next()
-        for row in reader:
-            if len(row) <= 0:
-                continue
-            row[0] = toepoch(row[0])
-            row.insert(1, sym)
-            yield row
-
-def readfiles(globpattern):
-    import glob
-    csvfiles = glob.glob(globpattern)
-    for csvfile in csvfiles:
-        for line in readfile(csvfile):
-            yield line
-
-# create sql 
-def sqlcreatetable(path=fixpath('data/sqlite/histdatadb'), tablename='test'):
-    import sqlite3
-    conn = sqlite3.connect(path)
-    cur = conn.cursor()
-
-    cur.execute("""DROP TABLE IF EXISTS %(tablename)s""" % vars())
-
-    cur.execute("""CREATE TABLE %(tablename)s (Date REAL
-                                       ,Sym TEXT
-                                       ,Open REAL
-                                       ,High REAL
-                                       ,Low REAL
-                                       ,Close REAL
-                                       ,Volume REAL
-                                       ,AdjClose REAL)""" % vars())
-
-    cur.execute("""CREATE INDEX dateidx_%(tablename)s ON %(tablename)s (Date)""" % vars())
-
-    cur.execute("""CREATE INDEX symidx_%(tablename)s ON %(tablename)s (Sym)""" % vars())
-
-    conn.commit()
-
-    conn.close()
-
-def toepoch(valuestr, format_ = '%Y-%m-%d'):
-    return time.mktime(datetime.datetime.strptime(valuestr, format_).timetuple())
-
-def sqlpopulatedata(files=fixpath('data/csv/*.csv'), path=fixpath('data/sqlite/histdatadb'), table='test', **kwargs):
-    import sqlite3
-
-    conn = sqlite3.connect(path)
-
-    try:
-        cur = conn.cursor()
-
-        def insert(data, table, verbose=False):
-
-            date = float(data[0])
-            sym = data[1]
-            open_ = float(data[2])
-            high = float(data[3])
-            low = float(data[4])
-            close = float(data[5])
-            volume = float(data[6])
-            adjclose = float(data[7])
-            
-            insert = """
-            INSERT INTO %(table)s (Date, Sym, Open, High, Low, Close, Volume, AdjClose)
-            VALUES ('%(date)s', '%(sym)s', %(open_)s, %(high)s, %(low)s, %(close)s,
-            %(volume)s, %(adjclose)s)
-            """ % vars()
-
-            if verbose:
-                print insert
-
-            cur.execute(insert)
-
-        for line in readfiles(files):
-            insert(line, table, **kwargs)
-
-        conn.commit()
-    finally:
-        conn.close()
-
-def sqlquery(sqlcmd="select * from prices", path=fixpath('data/sqlite/histdatadb')):
-    import sqlite3
-    conn = sqlite3.connect(path)
-    try:
-        cur = conn.cursor()
-        for row in cur.execute(sqlcmd):
-            yield row
-    finally:
-        conn.close()
-
-def sqlite2rec(query='select * from sp500'):
-    rowcountquery = 'select count(1) from (%s) a' % query 
-    rowcount = [r for r in sqlquery(rowcountquery)][0]
-    adtype = np.dtype([ ('date', float)
-                    ,('sym', '|S4')
-                    ,('open', float)
-                    ,('high', float)
-                    ,('low', float)
-                    ,('close', float)
-                    ,('volume', int)
-                    ,('adjclose', float)])
-    
-    emptyrows = np.empty(rowcount, dtype=adtype)
-    
-    data = sqlquery(query)
-    
-    i = 0
-    for row in data:
-        emptyrows[i] = np.array(tuple(row), dtype=adtype)
-        i = i + 1
-
-    return emptyrows.view(np.recarray)
-
-def gethistdataforsymbols(query, numrows=60):
-    
-    rec_arr = sqlite2rec(query)
-
-    import matplotlib.mlab as mlab
-    import numpy as np
-
-    syms = np.unique(rec_arr.sym)
-
-    xs = []
-
-    for sym in syms:
-        nosym = mlab.rec_drop_fields(rec_arr[rec_arr.sym == sym], ['sym',])
-        
-        xs.append(nosym[0:numrows].tolist())
-
-    return (syms, xs)
-#-----------------------------------------
+def reloadutils():
+    reload(util)
 
 import numpy as np
 
-isyahoo = True
-
-(symbols, histdata) = gethistdataforsymbols('select * from prices')
+(symbols, histdata) = util.gethistprices('select * from sp500')
 
 # create an ndarray from the allfiles sequence
 arr_files = np.array(histdata, dtype = float)
@@ -347,11 +161,10 @@ def seriesplot(data):
     ax4.plot(data)
 
 def yyyymmdd2epochsec(yyyymmdd):
-    return time.mktime(datetime.datetime.strptime(str(yyyymmdd)
-                                                  ,'%Y%m%d').timetuple())
+    return time.mktime(datetime.datetime.strptime(str(yyyymmdd) ,'%Y%m%d').timetuple())
 
 qd2epoch = yyyymmdd2epochsec
-epoch2dt = epochsec2datetime
+epoch2dt = util.epoch2datetime
 
 def returnsplot(d1, d2, data, dates):
     #dates in yyyymmdd format
@@ -390,7 +203,7 @@ def monthly_returns(data, dates):
 #   - passing an array to a function (altering a value/not altering a value)
 #   - assigning array to another variable and changing a value
 
-capacity = 1e3 if is32bit() else 1e8
+capacity = 1e3 if util.is32bit() else 1e8
 arr1 = np.ones(capacity)
 arr1.shape = (-1, 50)
 
@@ -660,7 +473,7 @@ struct.unpack(format_, a.data[rowpos : colpos])
 #accessed as members of the array, using arr.x and arr.y.
 #it's like working with database structures but at a much higher velocity.
 
-rec_arr = sqlite2rec(query='select * from sp500')
+rec_arr = util.sqlite2rec(query='select * from sp500')
 
 struct.unpack('<d4s4did', rec_arr.data[0:56])
 
@@ -668,9 +481,9 @@ import matplotlib.mlab as mlab
 
 # groupby
 recnumrecs = mlab.rec_groupby(rec_arr, ('sym',), (('sym', len, 'symcount'), ))
-sqlnumrecs = sqlquery('select sym, count(1) from prices group by sym')
+sqlnumrecs = util.sqlquery('select sym, count(1) from prices group by sym')
 
-sqlavgs = sqlquery('select sym, avg(open), avg(high), avg(low), avg(close),\
+sqlavgs = util.sqlquery('select sym, avg(open), avg(high), avg(low), avg(close),\
                         avg(volume), avg(adjclose) from prices group by sym')
 recavgs = mlab.rec_groupby(rec_arr, ('sym', ), (('open', np.average, 'avgopen')
                                                     ,('high', np.average, 'avghigh')
@@ -680,12 +493,12 @@ recavgs = mlab.rec_groupby(rec_arr, ('sym', ), (('open', np.average, 'avgopen')
                                                     ,('adjclose', np.average, 'avgadjclose')))
 
 # sort
-sqlsort = sqlquery('select * from prices order by sym, volume, close')
+sqlsort = util.sqlquery('select * from prices order by sym, volume, close')
 sortidx = np.lexsort([rec_arr.close, rec_arr.volume, rec_arr.sym])
 sorted_rec_arr = rec_arr[sortidx]
 
 # filtering
-sqlfilter1 = sqlquery('select * from prices where close > 250 and close < 375')
+sqlfilter1 = util.sqlquery('select * from prices where close > 250 and close < 375')
 recfilter1 = rec_arr[(rec_arr.close > 250) & (rec_arr.close < 375)]
 
 #joins
@@ -700,7 +513,7 @@ select *
    where sym = 'goog')  b
 where a.date = b.date
 """
-sqljoin = sqlquery(simplejoin)
+sqljoin = util.sqlquery(simplejoin)
 
 aapl = rec_arr[rec_arr.sym=='aapl']
 goog = rec_arr[rec_arr.sym=='goog']
@@ -717,7 +530,7 @@ select *
  where sym = 'goog'
 order by sym, date desc
 """
-sqlunion = sqlquery(simpleunion)
+sqlunion = util.sqlquery(simpleunion)
 
 from numpy.lib import recfunctions as recfunc
 recunion = recfunc.stack_arrays((aapl, goog)
@@ -726,7 +539,7 @@ recunion = recfunc.stack_arrays((aapl, goog)
                                 ,autoconvert=True)
 # sub selection
 simpleselection = "select close, volume from  prices where sym = 'aapl'"
-selected = sqlquery(simpleselection)
+selected = util.sqlquery(simpleselection)
 recselect = rec_arr[['close', 'volume']]
 
 
