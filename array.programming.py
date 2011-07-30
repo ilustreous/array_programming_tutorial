@@ -32,61 +32,6 @@ def testprices():
     prices = y.transpose()
     return prices
 
-def gethistdataforsymbols(syms, lookback=60, **kwargs):
-
-    histdatas = []
-    for sym in syms:
-        print >> sys.stdout, 'Getting hist data from yahoo: %s' % sym
-        histdatas.append(gethistdatafromyahoo(sym, **kwargs)[0:lookback])
-    return histdatas
-
-def gethistdatafromyahoo(sym, proxydict=None):
-    #header: Date,Open,High,Low,Close,Volume,Adj Close
-
-    import urllib
-
-    url = "http://ichart.finance.yahoo.com/table.csv?s=%s&d=6&e=19&f=2011&g=d&a=8&b=7&c=1984&ignore=.csv" % sym
-    proxies = proxydict
-    fh = urllib.urlopen(url, proxies=proxies)
-    try:
-        rows = []
-        fh.readline()
-        for row in fh.readlines():
-            row = row.strip().split(",")
-            
-            row[0] = time.mktime(datetime.datetime.strptime(row[0],
-                '%Y-%m-%d').timetuple())
-            rows.append(row)
-        return rows
-    finally:
-        fh.close()
-
-def readfile(file_):
-    #header: Date,Open,High,Low,Close,Volume,Adj Close
-    import csv
-    import datetime
-    rows = []
-    with open (file_, 'r') as fh:
-        reader = csv.reader(fh)
-        reader.next()
-        for row in reader:
-            if len(row) <= 0:
-                continue
-            row[0] = time.mktime(datetime.datetime.strptime(row[0],
-                '%Y-%m-%d').timetuple())
-            rows.append(row)
-    return rows[0:60]
-
-def readfiles(globpattern):
-    import glob
-    csvfiles = glob.glob(globpattern)
-    files = []
-    for csvfile in csvfiles:
-        file_ = readfile(csvfile) 
-        files.append(file_)
-    
-    return files
-
 def iswinplatform():
     """
     Returns:
@@ -113,16 +58,151 @@ def accumarray(arr, subs, func):
    
     return outarr
 
+def readfile(file_):
+    #header: Date,Open,High,Low,Close,Volume,Adj Close
+    import csv
+
+    sym = file_.split(os.sep)[-1].split(".")[0]
+
+    with open (file_, 'r') as fh:
+        reader = csv.reader(fh)
+        reader.next()
+        for row in reader:
+            if len(row) <= 0:
+                continue
+            row[0] = toepoch(row[0])
+            row.insert(1, sym)
+            yield row
+
+def readfiles(globpattern):
+    import glob
+    csvfiles = glob.glob(globpattern)
+    for csvfile in csvfiles:
+        for line in readfile(csvfile):
+            yield line
+
+# create sql 
+def sqlcreatetable(path=fixpath('data/sqlite/histdatadb'), tablename='test'):
+    import sqlite3
+    conn = sqlite3.connect(path)
+    cur = conn.cursor()
+
+    cur.execute("""DROP TABLE IF EXISTS %(tablename)s""" % vars())
+
+    cur.execute("""CREATE TABLE %(tablename)s (Date REAL
+                                       ,Sym TEXT
+                                       ,Open REAL
+                                       ,High REAL
+                                       ,Low REAL
+                                       ,Close REAL
+                                       ,Volume REAL
+                                       ,AdjClose REAL)""" % vars())
+
+    cur.execute("""CREATE INDEX dateidx_%(tablename)s ON %(tablename)s (Date)""" % vars())
+
+    cur.execute("""CREATE INDEX symidx_%(tablename)s ON %(tablename)s (Sym)""" % vars())
+
+    conn.commit()
+
+    conn.close()
+
+def toepoch(valuestr, format_ = '%Y-%m-%d'):
+    return time.mktime(datetime.datetime.strptime(valuestr, format_).timetuple())
+
+def sqlpopulatedata(files=fixpath('data/csv/*.csv'), path=fixpath('data/sqlite/histdatadb'), table='test', **kwargs):
+    import sqlite3
+
+    conn = sqlite3.connect(path)
+
+    try:
+        cur = conn.cursor()
+
+        def insert(data, table, verbose=False):
+
+            date = float(data[0])
+            sym = data[1]
+            open_ = float(data[2])
+            high = float(data[3])
+            low = float(data[4])
+            close = float(data[5])
+            volume = float(data[6])
+            adjclose = float(data[7])
+            
+            insert = """
+            INSERT INTO %(table)s (Date, Sym, Open, High, Low, Close, Volume, AdjClose)
+            VALUES ('%(date)s', '%(sym)s', %(open_)s, %(high)s, %(low)s, %(close)s,
+            %(volume)s, %(adjclose)s)
+            """ % vars()
+
+            if verbose:
+                print insert
+
+            cur.execute(insert)
+
+        for line in readfiles(files):
+            insert(line, table, **kwargs)
+
+        conn.commit()
+    finally:
+        conn.close()
+
+def sqlquery(sqlcmd="select * from prices", path=fixpath('data/sqlite/histdatadb')):
+    import sqlite3
+    conn = sqlite3.connect(path)
+    try:
+        cur = conn.cursor()
+        for row in cur.execute(sqlcmd):
+            yield row
+    finally:
+        conn.close()
+
+def sqlite2rec(query='select * from sp500'):
+    rowcountquery = 'select count(1) from (%s) a' % query 
+    rowcount = [r for r in sqlquery(rowcountquery)][0]
+    adtype = np.dtype([ ('date', float)
+                    ,('sym', '|S4')
+                    ,('open', float)
+                    ,('high', float)
+                    ,('low', float)
+                    ,('close', float)
+                    ,('volume', int)
+                    ,('adjclose', float)])
+    
+    emptyrows = np.empty(rowcount, dtype=adtype)
+    
+    data = sqlquery(query)
+    
+    i = 0
+    for row in data:
+        emptyrows[i] = np.array(tuple(row), dtype=adtype)
+        i = i + 1
+
+    return emptyrows.view(np.recarray)
+
+def gethistdataforsymbols(query, numrows=60):
+    
+    rec_arr = sqlite2rec(query)
+
+    import matplotlib.mlab as mlab
+    import numpy as np
+
+    syms = np.unique(rec_arr.sym)
+
+    xs = []
+
+    for sym in syms:
+        nosym = mlab.rec_drop_fields(rec_arr[rec_arr.sym == sym], ['sym',])
+        
+        xs.append(nosym[0:numrows].tolist())
+
+    return (syms, xs)
+#-----------------------------------------
+
 import numpy as np
 
 isyahoo = True
 
-symbols = np.array(['AAPL', 'GOOG', 'NFLX', 'SINA'], dtype=str)
-if isyahoo:
-    # read in all files (aapl, goog, nflx)
-    histdata = gethistdataforsymbols(symbols, proxydict=SUSQPROXY)
-else:
-    histdata = readfiles(fixpath('data/csv/*.csv'))
+(symbols, histdata) = gethistdataforsymbols('select * from prices')
 
 # create an ndarray from the allfiles sequence
 arr_files = np.array(histdata, dtype = float)
@@ -210,13 +290,13 @@ stdevs = variances ** .5
 ann_devs = stdevs * (252 ** .5)
 
 # vol for symbol
-someindex = (symbols=='AAPL').nonzero()
+someindex = (symbols=='aapl').nonzero()
 
-ann_devs[(symbols=='AAPL').nonzero()][0]
+ann_devs[(symbols=='aapl').nonzero()][0]
 
-ann_devs[(symbols=='GOOG').nonzero()][0]
+ann_devs[(symbols=='goog').nonzero()][0]
 
-ann_devs[(symbols=='NFLX').nonzero()][0]
+ann_devs[(symbols=='nflx').nonzero()][0]
 
 # symbols greater than 50 vol
 symbols[np.nonzero(ann_devs > .5),:]
@@ -243,7 +323,6 @@ std_prices = np.sqrt( mean_price_squred)
 # oneliner to get std of prices
 std_prices2 = np.sqrt( np.mean( 
     np.abs(prices - prices.mean(axis=0)) ** 2 , axis=0 ))
-
 
 # lets boxplot to visualize the stdev
 fig  = plt.figure()
@@ -581,105 +660,8 @@ struct.unpack(format_, a.data[rowpos : colpos])
 #accessed as members of the array, using arr.x and arr.y.
 #it's like working with database structures but at a much higher velocity.
 
-# create sql 
-def sqlcreatetable(path=fixpath('data/sqlite/histdatadb')):
-    import sqlite3
-    conn = sqlite3.connect(path)
-    cur = conn.cursor()
-    cur.execute("""DROP TABLE IF EXISTS prices""")
-    cur.execute("""CREATE TABLE prices (Date TEXT
-                                       ,Sym TEXT
-                                       ,Open REAL
-                                       ,High REAL
-                                       ,Low REAL
-                                       ,Close REAL
-                                       ,Volume INTEGER
-                                       ,AdjClose REAL)""")
-    conn.commit()
-    conn.close()
+rec_arr = sqlite2rec(query='select * from sp500')
 
-def sqlpopulatedata(files=fixpath('data/csv/*.csv'), path=fixpath('data/sqlite/histdatadb')):
-    import sqlite3
-    conn = sqlite3.connect(path)
-
-    try:
-        cur = conn.cursor()
-
-        def insert(sym, data):
-
-            date = datetime.datetime.fromtimestamp(data[0]).strftime("%Y-%m-%d")
-            sym = sym
-            open_ = float(data[1])
-            high = float(data[2])
-            low = float(data[3])
-            close = float(data[4])
-            volume = float(data[5])
-            adjclose = float(data[6])
-            
-            insert = """
-            INSERT INTO prices (Date, Sym, Open, High, Low, Close, Volume, AdjClose)
-            VALUES ('%(date)s', '%(sym)s', %(open_)s, %(high)s, %(low)s, %(close)s,
-            %(volume)s, %(adjclose)s)
-            """ % vars()
-            print insert
-            cur.execute(insert)
-
-        import glob
-        files_ = glob.glob(files)
-        
-        histdata = readfiles(files)
-        syms = [x.split(os.sep)[-1].split(".")[0] for x in files_]
-        symhistdata = zip(syms, histdata)
-        
-        for (s, hs) in symhistdata:
-            for h in hs:
-                insert(s, h)
-
-        conn.commit()
-    finally:
-        conn.close()
-
-def sqlquery(sqlcmd="select * from prices", path=fixpath('data/sqlite/histdatadb')):
-    import sqlite3
-    conn = sqlite3.connect(path)
-    try:
-        cur = conn.cursor()
-        for row in cur.execute(sqlcmd):
-            yield row
-    finally:
-        conn.close()
-
-def recpopulate(files=fixpath('data/csv/*.csv')):
-
-    import glob
-
-    files_ = glob.glob(files)
-        
-    histdata = readfiles(files)
-
-    syms = [x.split(os.sep)[-1].split(".")[0] for x in files_]
-
-    symhistdata = zip(syms, histdata)
-    xs = []
-    for (s, hs) in symhistdata:
-        for h in hs:
-            h.insert(1, s)
-            if h == None:
-                continue
-            xs.append(tuple(h))
-
-    adtype = np.dtype([ ('date', float)
-                    ,('sym', '|S4')
-                    ,('open', float)
-                    ,('high', float)
-                    ,('low', float)
-                    ,('close', float)
-                    ,('volume', int)
-                    ,('adjclose', float)])
-
-    return np.array(xs, dtype=adtype).view(np.recarray)
-
-rec_arr = recpopulate()
 struct.unpack('<d4s4did', rec_arr.data[0:56])
 
 import matplotlib.mlab as mlab
@@ -701,7 +683,6 @@ recavgs = mlab.rec_groupby(rec_arr, ('sym', ), (('open', np.average, 'avgopen')
 sqlsort = sqlquery('select * from prices order by sym, volume, close')
 sortidx = np.lexsort([rec_arr.close, rec_arr.volume, rec_arr.sym])
 sorted_rec_arr = rec_arr[sortidx]
-
 
 # filtering
 sqlfilter1 = sqlquery('select * from prices where close > 250 and close < 375')
@@ -738,7 +719,7 @@ order by sym, date desc
 """
 sqlunion = sqlquery(simpleunion)
 
-from np.lib import recfunctions as recfunc
+from numpy.lib import recfunctions as recfunc
 recunion = recfunc.stack_arrays((aapl, goog)
                                 ,usemask=False
                                 ,asrecarray=True
@@ -752,8 +733,6 @@ recselect = rec_arr[['close', 'volume']]
 # append fields
 
 # drop fields
-
-
 
 # showed the basics and I said it was faster in some cases
 # now i'll prove it to you
