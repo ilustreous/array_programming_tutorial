@@ -1,6 +1,6 @@
-import numpy as np
 
 def testprices():
+    import numpy as np
     x = np.array([ 35.438,35.75 ,35.875 ,36.938 ,39.313 
                   ,39.125 ,42.5 ,42.313 ,45.5 ,46.688 ,46.125 
                   ,43.75 ,45.375 ,46.594 ,46.938 ,46.188 
@@ -12,6 +12,7 @@ def testprices():
 
 def accumarray(arr, subs, func):
     
+    import numpy as np
     uniqs = np.unique(subs)
     outarr = np.zeros((len(uniqs)))
     
@@ -19,5 +20,6 @@ def accumarray(arr, subs, func):
         outarr[x] = func(arr[subs==x])
    
     return outarr
+
 
 
