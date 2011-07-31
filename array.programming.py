@@ -11,15 +11,15 @@ CLOSE = 4
 VOLUME = 5
 ADJCLOSE = 6
 
-def reloadutils():
-    reload(util)
+def reloadutil():
+    import __builtin__ as b
+    b.dreload(util)
 
 import numpy as np
 
-(symbols, histdata) = util.gethistprices('select * from sp500')
-
-# create an ndarray from the allfiles sequence
-arr_files = np.array(histdata, dtype = float)
+sqltable = 'prices' if util.is32bit() else 'sp500'
+verbose = True
+(symbols, arr_files) = util.gethistprices('select * from %(sqltable)s' % vars(), verbose=verbose)
 
 print >> sys.stdout, "Number of dimensions: %d" % arr_files.ndim
 
@@ -473,7 +473,7 @@ struct.unpack(format_, a.data[rowpos : colpos])
 #accessed as members of the array, using arr.x and arr.y.
 #it's like working with database structures but at a much higher velocity.
 
-rec_arr = util.sqlite2rec(query='select * from sp500')
+rec_arr = util.sqlite2rec(query='select * from %(sqltable)s' % vars(), verbose=verbose)
 
 struct.unpack('<d4s4did', rec_arr.data[0:56])
 
@@ -481,10 +481,10 @@ import matplotlib.mlab as mlab
 
 # groupby
 recnumrecs = mlab.rec_groupby(rec_arr, ('sym',), (('sym', len, 'symcount'), ))
-sqlnumrecs = util.sqlquery('select sym, count(1) from prices group by sym')
+sqlnumrecs = util.sqlquery('select sym, count(1) from %(sqltable)s group by sym' % vars())
 
 sqlavgs = util.sqlquery('select sym, avg(open), avg(high), avg(low), avg(close),\
-                        avg(volume), avg(adjclose) from prices group by sym')
+                        avg(volume), avg(adjclose) from %(sqltable)s group by sym' % vars())
 recavgs = mlab.rec_groupby(rec_arr, ('sym', ), (('open', np.average, 'avgopen')
                                                     ,('high', np.average, 'avghigh')
                                                     ,('low', np.average, 'avglow')
@@ -493,12 +493,12 @@ recavgs = mlab.rec_groupby(rec_arr, ('sym', ), (('open', np.average, 'avgopen')
                                                     ,('adjclose', np.average, 'avgadjclose')))
 
 # sort
-sqlsort = util.sqlquery('select * from prices order by sym, volume, close')
+sqlsort = util.sqlquery('select * from %(sqltable)s order by sym, volume, close' % vars())
 sortidx = np.lexsort([rec_arr.close, rec_arr.volume, rec_arr.sym])
 sorted_rec_arr = rec_arr[sortidx]
 
 # filtering
-sqlfilter1 = util.sqlquery('select * from prices where close > 250 and close < 375')
+sqlfilter1 = util.sqlquery('select * from %(sqltable)s where close > 250 and close < 375' % vars())
 recfilter1 = rec_arr[(rec_arr.close > 250) & (rec_arr.close < 375)]
 
 #joins
@@ -506,13 +506,13 @@ simplejoin = """
 select * 
   from
 (select * 
-   from  prices 
+   from  %(sqltable)s
   where sym = 'aapl') a
 ,(select * 
-    from  prices 
+    from %(sqltable)s
    where sym = 'goog')  b
 where a.date = b.date
-"""
+""" % vars()
 sqljoin = util.sqlquery(simplejoin)
 
 aapl = rec_arr[rec_arr.sym=='aapl']
@@ -522,14 +522,14 @@ recjoin = mlab.rec_join(['date'], aapl, goog, jointype='inner')
 # union (rec_append_fields)
 simpleunion = """
 select * 
-  from prices 
+  from %(sqltable)s
  where sym = 'aapl'
 union
 select * 
-  from  prices 
+  from %(sqltable)s 
  where sym = 'goog'
 order by sym, date desc
-"""
+""" % vars()
 sqlunion = util.sqlquery(simpleunion)
 
 from numpy.lib import recfunctions as recfunc
@@ -538,15 +538,7 @@ recunion = recfunc.stack_arrays((aapl, goog)
                                 ,asrecarray=True
                                 ,autoconvert=True)
 # sub selection
-simpleselection = "select close, volume from  prices where sym = 'aapl'"
+simpleselection = "select close, volume from  %(sqltable)s where sym = 'aapl'"
 selected = util.sqlquery(simpleselection)
 recselect = rec_arr[['close', 'volume']]
 
-
-# append fields
-
-# drop fields
-
-# showed the basics and I said it was faster in some cases
-# now i'll prove it to you
-# into to profiling 
