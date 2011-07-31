@@ -97,6 +97,13 @@ def sqlquery(sqlcmd="select * from prices", path=cu.fixpath('data/sqlite/histdat
     finally:
         conn.close()
 
+def sqlite2dict(query='select * from sp500', verbose=False, **kwargs):
+    import collections
+    ts = collections.defaultdict(list) 
+    for row in sqlquery(query, **kwargs): 
+        ts[row[1]].append(row)
+    return ts
+
 def sqlite2rec(query='select * from sp500', verbose=False, **kwargs):
     import numpy as np
     rowcountquery = 'select count(1) from (%s) a' % query 
@@ -112,32 +119,89 @@ def sqlite2rec(query='select * from sp500', verbose=False, **kwargs):
     
     emptyrows = np.empty(rowcount, dtype=adtype)
     
-    i = 0
-    for row in sqlquery(query, **kwargs):
-        emptyrows[i] = np.array(tuple(row), dtype=adtype)
+    ts = []
+    start = 0
+    step = 250000
+    for row in sqlquery(query, **kwargs): 
+        ts.append(row)
         
-        if verbose:
-            if i % 10000 == 0:
-                print '%d of %s' % (i, rowcount)
-        i = i + 1
+        if len(ts) == step:
+            stop = start + step
+            #print 'start:%d\nstop:%d' % (start, stop)
+            # go from start to stop excluding stop
+            emptyrows[start:stop] = np.array(ts, dtype=adtype)
+            start = stop
+            ts = []
+
+            if verbose:
+                if start % step == 0:
+                    print '%d of %s rows' % (start, rowcount)
+
+    if len(ts) > 0:
+        emptyrows[start:start+len(ts)] = np.array(ts, dtype=adtype)
 
     return emptyrows.view(np.recarray)
 
-def gethistprices(query, numrows=100):
+def sqlite2recslow(query='select * from sp500', verbose=False, **kwargs):
+    import numpy as np
+    rowcountquery = 'select count(1) from (%s) a' % query 
+    rowcount = [r for r in sqlquery(rowcountquery, **kwargs)][0][0]
+    adtype = np.dtype([ ('date', float)
+                    ,('sym', '|S4')
+                    ,('open', float)
+                    ,('high', float)
+                    ,('low', float)
+                    ,('close', float)
+                    ,('volume', int)
+                    ,('adjclose', float)])
     
-    rec_arr = sqlite2rec(query)
+    emptyrows = np.empty(rowcount, dtype=adtype)
+   
+    i = 0
+    for row in sqlquery(query, **kwargs): 
+        emptyrows[i] = np.array(row, dtype=adtype)
+        if verbose:
+            if i % 250000 == 0:
+                print '%d of %s rows' % (i, rowcount)
+
+        i += 1
+
+    return emptyrows.view(np.recarray)
+
+
+def gethistprices(query, numrows=1000, **kwargs):
+    
+    rec_arr = sqlite2rec(query, **kwargs)
 
     import matplotlib.mlab as mlab
+    
     import numpy as np
 
-    syms = np.unique(rec_arr.sym)
+    (syms, posuniq, pos) = np.unique(rec_arr.sym, True, True)
+    
+    new_rec_arr = mlab.rec_append_fields(rec_arr, 'idx', pos)
+    
+    nosym = mlab.rec_drop_fields(new_rec_arr, ['sym',])
+    
+    recnumrecs = mlab.rec_groupby(nosym, ('idx',), (('idx', len, 'idxcount'), ))
 
-    xs = []
+    idx = np.nonzero(recnumrecs.idxcount >= numrows)[0]
 
-    for sym in syms:
-        nosym = mlab.rec_drop_fields(rec_arr[rec_arr.sym == sym], ['sym',])
+    idxcount = len(recnumrecs[idx])
+
+    xs = np.empty((idxcount, numrows, len(nosym[0])-1), dtype=float)
+
+    for i in xrange(idxcount):
+
+        if kwargs.has_key('verbose') and kwargs['verbose'] and i % 50 == 0:
+            print '%d of %d' % (i, idxcount)
         
-        xs.append(nosym[0:numrows].tolist())
+        curdata = nosym[nosym.idx == idx[i]]
 
-    return (syms, xs)
+        curdata_arr = np.array(curdata.tolist(), dtype=float)
+        xs[i] = curdata_arr[0:numrows,0:-1]
+        
+    return (syms[idx], xs)
+
+
 
