@@ -107,10 +107,8 @@ Steps
    `me`_ and we'll try to work it out 1-on-1.
 
 
-***************
 Troubleshooting
-***************
-
+===============
 
 1. Some people have been getting this error::
 

@@ -9,3 +9,4 @@ Tutorials
    :maxdepth: 1
    
    Setup Python <pythonsetup>
+   Array Programming <arrayprogramming>
