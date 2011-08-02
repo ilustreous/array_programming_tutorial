@@ -24,23 +24,15 @@ Numpy is the python package for processing numerical arrays.
 
   - Microsoft less than a year a go ported numpy/scipy into `IronPython <http://pytools.codeplex.com/wikipage?title=NumPy%20and%20SciPy%20for%20.Net>`_
 
-    - May have some other motives but they see the pull numpy/scipy has
-      on the scientific community
-    - When I went to pycon 2011 the microsoft guys were really trying to sell
-      me the `Azure platform <http://www.microsoft.com/windowsazure/>`_ 
-      for use with IronPython.
+    - May have some other motives but they value in this space
 
-  - AQR Capital - hedgefund in chicago pushing the stack with their `pandas <https://github.com/wesm/pandas>`_
-    module (a level above numpy).
+  - AQR Capital - hedge fund in chicago built a stack on top of numpy called `pandas <https://github.com/wesm/pandas>`_ for timeseries data
    
   - Matlab views numpy/scipy as a true competitor
-    
-    - I was on a conference call with some programmers at matlab trying to
-      uncover a memory problem we were having.
-    - I asked them what they thought of python and the numpy/scipy stack 
-      and maybe some how integrate the two.
+
+    - I was on a conference call with some programmers at matlab trying to uncover a memory problem we were having
     - They told me that python is one of their leading competitors for market
-      share.
+      share
 
 Overview
 ========

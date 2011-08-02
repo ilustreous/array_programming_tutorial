@@ -9,8 +9,6 @@ Structure
 =========
 Tutorial is structured after the 
 `Learn Python the Hard Way <http://learnpythonthehardway.org>`_ way.
-But given the time constraints I set up an interactive demo that where
-we can explore the results at the ipython_ REPL (read-eval-print loop).
 
 
 
@@ -20,7 +18,7 @@ Inter-mixed
 
 - IPython
 
-- numpy/scipy stack (90%)
+- Numpy/scipy stack 
 
   - compare contrast between
 
@@ -28,9 +26,9 @@ Inter-mixed
 
     - sql programming
 
-- matplotlib (5%)
+- Matplotlib 
 
-- cpu/memory profiling (5%)
+- Cpu/memory profiling
 
 
 

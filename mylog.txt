@@ -1,0 +1,135 @@
+run demo.ipython.py
+execdemo()
+# #Adapted from scipy conference talk by f.perez and b.graner (Texas '07)
+# # <demo> silent
+# import sys
+# from IPython import ipapi
+# ip = ipapi.get()
+# ip.options.automagic = True
+# print "The '?' provides help in many contexts"
+?
+execdemo()
+# # <demo> silent
+# print """Magic commands are very useful.
+#
+# They provide support for altering the behavior of IPython
+# and system features/programs.
+#
+# Use %lsmagic to list all magic commands.
+#
+# Use '?' for help on what specific magic commands do.
+#
+# """
+execdemo()
+# # <demo> silent
+# print r"""Learn about objects with '?' and '??' and tab completion.
+#     - '?' will show doc strings.
+#     - '??' will show source code.
+#
+# # import code
+#
+# # code?
+#
+# # code??
+#
+# # code. <tab>
+#[Out]# 6
+#
+# """
+#[Out]# 7
+import code
+code?
+code??
+execdemo()
+# # <demo> silent
+# print """Learn about functions too.
+#
+# # code.Command<tab>
+#
+# # code.CommandCompiler?
+#
+# # code.CommandCompiler??
+#
+# """
+execdemo()
+# # <demo> silent
+# print """Searching for a function in a large code base.
+#
+# # import numpy
+#
+# # numpy.*cos*?
+#
+# """
+execdemo()
+# # <demo> silent
+# print """Let's see what commands we have used by checking our history.
+#
+# # hist
+#
+# or
+#
+# # hist -n (no line numbers)
+#
+# """
+execdemo()
+# # <demo> silent
+# print """Let's execute a command from history
+#
+# # x = 4
+#
+# # x += 1
+#
+# # hist
+#
+# # exec In[somenumber]
+#
+# """
+x=4
+x+=1
+hist
+exec In[37]
+x
+exec In[37]
+x
+In?
+execdemo()
+# # <demo> silent
+# print """Log what you type.
+#
+# # logstart -o -r -t mylog.txt append
+#
+# Do logstart? for agument details.
+#
+# Run a bunch of python commands.
+#
+# # \"cat\" your log file to see what it logged.
+#
+# # stop log with the \"logstop\" magic command
+# """
+log -o -r -t mylog.txt append
+# Tue, 02 Aug 2011 00:10:05
+cat mylog.txt
+# Tue, 02 Aug 2011 00:10:07
+cat mylog.txt
+# Tue, 02 Aug 2011 00:10:08
+cat mylog.txt
+# Tue, 02 Aug 2011 00:10:18
+execdemo()
+# Tue, 02 Aug 2011 00:10:18
+# <demo> silent
+# Tue, 02 Aug 2011 00:10:18
+def concat(a, b):
+# Tue, 02 Aug 2011 00:10:18
+    return a + b
+# Tue, 02 Aug 2011 00:10:18
+print """Puts parens around for you.
+# Tue, 02 Aug 2011 00:10:18
+# concat 'hello', 'world'
+# Tue, 02 Aug 2011 00:10:18
+comma in front of concat will quote words.
+# Tue, 02 Aug 2011 00:10:18
+# ,concat hello world
+# Tue, 02 Aug 2011 00:10:18
+"""
+# Tue, 02 Aug 2011 00:10:21
+logstop

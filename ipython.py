@@ -126,7 +126,7 @@ comma in front of concat will quote words.
 # <demo> silent
 print """%run magic command for running python scripts.
 
-# run -i args 'these' 'are' 'passed' 'to' 'args.py'
+# run -i ipython_tutorial/args 'these' 'are' 'passed' 'to' 'args.py'
 
 """
 # <demo> stop
@@ -136,7 +136,7 @@ print """%run magic command for running python scripts.
 
 Variables from simple.py are put into your ipython session
 
-# run -i simple
+# run -i ipython_tutorial/simple
 
 """
 # <demo> stop
@@ -150,8 +150,9 @@ import os
 if not os.path.exists('ipython_scratch'):
     os.mkdir('ipython_scratch')
 
+import util
 for i in range(5):
-    f = 'ipython_scratch/foo_%s' % i
+    f = util.fixpath('ipython_scratch/foo_%s' % i)
     open(f, 'w').close()
 
 print """capture file information.

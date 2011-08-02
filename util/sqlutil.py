@@ -1,4 +1,5 @@
 import classutil as cu
+import dateutil as du
 import os
 
 def readfile(file_):
@@ -13,7 +14,7 @@ def readfile(file_):
         for row in reader:
             if len(row) <= 0:
                 continue
-            row[0] = cu.str2epoch(row[0])
+            row[0] = du.str2epoch(row[0])
             row.insert(1, sym)
             yield row
 
@@ -24,7 +25,6 @@ def readfiles(globpattern):
         for line in readfile(csvfile):
             yield line
 
-# create sql 
 def sqlcreatetable(path=cu.fixpath('data/sqlite/histdatadb'), tablename='test'):
     import sqlite3
     conn = sqlite3.connect(path)
@@ -48,7 +48,6 @@ def sqlcreatetable(path=cu.fixpath('data/sqlite/histdatadb'), tablename='test'):
     conn.commit()
 
     conn.close()
-
 
 def sqlpopulatedata(files=cu.fixpath('data/csv/*.csv'), path=cu.fixpath('data/sqlite/histdatadb'), table='test', **kwargs):
     import sqlite3
@@ -106,8 +105,14 @@ def sqlite2dict(query='select * from sp500', verbose=False, **kwargs):
 
 def sqlite2rec(query='select * from sp500', verbose=False, **kwargs):
     import numpy as np
-    rowcountquery = 'select count(1) from (%s) a' % query 
+
+    rowcountquery = 'select count(1) from (%s) a' % query.replace('order by date desc', '')
+
+    print 'Row count = %d'
     rowcount = [r for r in sqlquery(rowcountquery, **kwargs)][0][0]
+
+    print 'Row count = %d' % rowcount
+
     adtype = np.dtype([ ('date', float)
                     ,('sym', '|S4')
                     ,('open', float)
@@ -168,7 +173,6 @@ def sqlite2recslow(query='select * from sp500', verbose=False, **kwargs):
 
     return emptyrows.view(np.recarray)
 
-
 def gethistprices(query, numrows=1000, **kwargs):
     
     rec_arr = sqlite2rec(query, **kwargs)
@@ -199,9 +203,14 @@ def gethistprices(query, numrows=1000, **kwargs):
         curdata = nosym[nosym.idx == idx[i]]
 
         curdata_arr = np.array(curdata.tolist(), dtype=float)
-        xs[i] = curdata_arr[0:numrows,0:-1]
+        xs[i] = curdata_arr[0:numrows:,0:-1]
         
     return (syms[idx], xs)
 
 
 
+#run getdataforsymbols.py
+#util.sqlcreatetable(tablename='sp500')
+#cd data/csv/sp500
+#ls | xargs grep '404 Not Found' | gawk -F':' '{print $1}' | xargs rm
+#util.sqlpopulatedata(files=utilfixpath('data/csv/sp500/*.csv'), table='sp500')
