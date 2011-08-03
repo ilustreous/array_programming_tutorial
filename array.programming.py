@@ -39,7 +39,7 @@ slidecounter('Initial Setup')
 
 import numpy as np
 
-sqltable = 'prices' if util.is32bit() else 'sp500'
+sqltable = 'sp500_small' if util.is32bit() else 'sp500'
 
 query = 'select * from %(sqltable)s order by date desc' % vars()
 
@@ -175,7 +175,7 @@ slidecounter() #
 
 # arithmetic operations are computed elementwise
 
-# compute the volatility of aapl, goog, nflx
+# compute the volatility 
 price_relatives = closeprices[1:numdays] / closeprices[0:numdays-1, :]
 
 
@@ -286,6 +286,13 @@ nikkei.percent_change??
 
 """
 
+myway = percent_change(closeprices[:,1])
+hisway = nikkei.percent_change(closeprices[:,1])
+
+myway2 = percent_change(closeprices)
+
+# hisway2 = nikkei.percent_change(closeprices) #will break 
+
 ################
 slidecounter() #
 ################
@@ -302,6 +309,7 @@ nikkei.seriesplot??
 
 """
 
+seriesplot(closeprices)
 
 ################
 slidecounter() #
@@ -327,7 +335,7 @@ slidecounter() #
 
 def returnsplot(d1, d2, data, dates):
     #dates in yyyymmdd format
-    plotvals = data[np.logical_and(dates > qd2epoch(d1), dates < qd2epoch(d2))]
+    plotvals = data[np.logical_and(dates >= qd2epoch(d1), dates <= qd2epoch(d2))]
     seriesplot(percent_change(plotvals))
 
 print """
@@ -336,6 +344,9 @@ nikkei.returnsplot??
 
 """
 
+returnsplot(20110701, 20110710, closeprices, dates)
+
+nikkei.returnsplot(yyyymmdd2epochsec(20110701), yyyymmdd2epochsec(20110710), closeprices[:,1].tolist(), dates.tolist())
 
 ################
 slidecounter() #
@@ -380,107 +391,14 @@ nikkei.monthly_returns??
 
 """
 
-################
-slidecounter() #
-################
-# <demo> stop
-
-
-# <demo> silent
-
-stop_here_for_problem = """Compute the standard deviation by symbol.
-
-1) Imperative Programming style
-2) Array Programming style
-
-Bonus:
-    1) Compute the standard deviation in the array 
-       programming style in 1 line.
-    2) Create a box-and-wisker plot for GOOG
-
-Take 15-20 min to work it out. 
-
-Work with neighbors, use the internet.
-
-BUT don't use np.stdev use it to check your answer!!!
-
-"""
-
-print stop_here_for_problem
 
 ################
 slidecounter() #
 ################
 # <demo> stop
 
-price_from_mean = closeprices - closeprices.mean(axis=0)
 
 
-
-################
-slidecounter() #
-################
-# <demo> stop
-
-abs_price_from_mean = np.abs(price_from_mean)
-
-
-
-################
-slidecounter() #
-################
-# <demo> stop
-
-abs_price_squared = abs_price_from_mean ** 2
-
-
-
-################
-slidecounter() #
-################
-# <demo> stop
-
-mean_price_squred = np.mean( abs_price_squared, axis=0 )
-
-
-
-################
-slidecounter() #
-################
-# <demo> stop
-
-std_prices = np.sqrt( mean_price_squred)
-
-
-
-################
-slidecounter() #
-################
-# <demo> stop
-
-# oneliner to get std of prices
-std_prices2 = np.sqrt( np.mean( np.abs(closeprices - closeprices.mean(axis=0)) ** 2 , axis=0 ))
-
-
-
-################
-slidecounter() #
-################
-# <demo> stop
-
-# lets boxplot to visualize the stdev
-fig  = plt.figure()
-ax3 = fig.add_subplot(111)
-ax3.boxplot(closeprices[:, ann_devs.argsort()[-1]], notch=0, sym='+', vert=1, whis=1.5, positions=None
-        , widths=None, patch_artist=False)
-
-ax3.set_title(symbols[ann_devs.argsort()][-1])
-
-
-################
-slidecounter() #
-################
-# <demo> stop
 
 # <demo> silent
 memory_copy = """
@@ -522,7 +440,6 @@ slidecounter() #
 arr2 = arr1
 
 arr1 is arr2
-
 
 
 ################
@@ -633,6 +550,7 @@ slidecounter() #
 
 # named record
 adtype = np.dtype([('a',int), ('b', int), ('c', int), ('d', int)])
+
 arr_named = np.array([(3,3,4,5),(3,34,34,5)], dtype=adtype)
 
 
@@ -800,6 +718,9 @@ Elements do NOT need to be homogeneous single types. They can
 be made up of heterogeneous types they just need to be of 
 the same size.
 
+Recarrys are aned to be of 
+the same size.
+
 Recarrys are analogous to columns in a spreadsheet. 
 
 The recarray gives us the ability to access data via attributes
@@ -813,7 +734,6 @@ some_rec_array['date']
 """
 
 
-
 ################
 slidecounter() #
 ################
@@ -821,7 +741,6 @@ slidecounter() #
 
 
 rec_arr = util.sqlite2rec(query='select * from %(sqltable)s' % vars(), verbose=verbose)
-
 
 
 ################
@@ -842,8 +761,18 @@ slidecounter() #
 import matplotlib.mlab as mlab
 
 # groupby
+
+q = 'select sym, count(1) from %(sqltable)s group by sym' % vars()
+sqlnumrecs = util.sqlquery(q)
+
+print q
+
+################
+slidecounter() #
+################
+# <demo> stop
+
 recnumrecs = mlab.rec_groupby(rec_arr, ('sym',), (('sym', len, 'symcount'), ))
-sqlnumrecs = util.sqlquery('select sym, count(1) from %(sqltable)s group by sym' % vars())
 
 
 
@@ -852,8 +781,17 @@ slidecounter() #
 ################
 # <demo> stop
 
-sqlavgs = util.sqlquery('select sym, avg(open), avg(high), avg(low), avg(close),\
-                        avg(volume), avg(adjclose) from %(sqltable)s group by sym' % vars())
+q = 'select sym, avg(open), avg(high), avg(low), avg(close),\
+     avg(volume), avg(adjclose) from %(sqltable)s group by sym' % vars()
+sqlavgs = util.sqlquery(q)
+
+print q
+
+################
+slidecounter() #
+################
+# <demo> stop
+
 recavgs = mlab.rec_groupby(rec_arr, ('sym', ), (('open', np.average, 'avgopen')
                                                     ,('high', np.average, 'avghigh')
                                                     ,('low', np.average, 'avglow')
@@ -869,7 +807,20 @@ slidecounter() #
 # <demo> stop
 
 # sort
-sqlsort = util.sqlquery('select * from %(sqltable)s order by sym, volume, close' % vars())
+q = 'select * from %(sqltable)s order by sym, volume, close' % vars()
+sqlsort = util.sqlquery(q)
+
+print q
+
+
+################
+slidecounter() #
+################
+# <demo> stop
+
+
+
+
 sortidx = np.lexsort([rec_arr.close, rec_arr.volume, rec_arr.sym])
 sorted_rec_arr = rec_arr[sortidx]
 
@@ -881,7 +832,17 @@ slidecounter() #
 # <demo> stop
 
 # filtering
-sqlfilter1 = util.sqlquery('select * from %(sqltable)s where close > 250 and close < 375' % vars())
+q = 'select * from %(sqltable)s where close > 250 and close < 375' % vars()
+sqlfilter1 = util.sqlquery(q)
+
+print q
+
+################
+slidecounter() #
+################
+# <demo> stop
+
+
 recfilter1 = rec_arr[(rec_arr.close > 250) & (rec_arr.close < 375)]
 
 
@@ -905,8 +866,17 @@ where a.date = b.date
 """ % vars()
 sqljoin = util.sqlquery(simplejoin)
 
+print simplejoin
+
+
+################
+slidecounter() #
+################
+# <demo> stop
+
 aapl = rec_arr[rec_arr.sym=='aapl']
 goog = rec_arr[rec_arr.sym=='goog']
+
 recjoin = mlab.rec_join(['date'], aapl, goog, jointype='inner')
 
 
@@ -929,7 +899,7 @@ order by sym, date desc
 """ % vars()
 sqlunion = util.sqlquery(simpleunion)
 
-
+print simpleunion
 
 ################
 slidecounter() #
@@ -952,7 +922,8 @@ slidecounter() #
 # sub selection
 simpleselection = "select close, volume from  %(sqltable)s where sym = 'aapl'"
 selected = util.sqlquery(simpleselection)
-recselect = rec_arr[['close', 'volume']]
+
+print simpleselection
 
 
 
@@ -961,3 +932,9 @@ slidecounter() #
 ################
 # <demo> stop
 
+
+recselect = rec_arr[['close', 'volume']]
+
+# <demo> stop
+
+                                                                                                                                                                                                                                                                                                                                                                                                   

@@ -108,7 +108,6 @@ def sqlite2rec(query='select * from sp500', verbose=False, **kwargs):
 
     rowcountquery = 'select count(1) from (%s) a' % query.replace('order by date desc', '')
 
-    print 'Row count = %d'
     rowcount = [r for r in sqlquery(rowcountquery, **kwargs)][0][0]
 
     print 'Row count = %d' % rowcount

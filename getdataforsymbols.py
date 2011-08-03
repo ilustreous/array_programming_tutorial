@@ -26,7 +26,7 @@ def getsymbols(path='data/sp500.csv'):
     return syms
 
 def getdatafromyahoo(sym):
-    url = "http://ichart.finance.yahoo.com/table.csv?s=%s&d=7&e=1&f=2011&g=d&a=8&b=7&c=1984&ignore=.csv" % sym
+    url = "http://ichart.finance.yahoo.com/table.csv?s=%s&d=7&e=2&f=2011&g=d&a=8&b=7&c=1984&ignore=.csv" % sym
     urllib.urlretrieve(url, 'data/csv/sp500/%s.csv' % sym.lower())
     
 

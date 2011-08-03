@@ -1,7 +1,7 @@
 .. numpystack:
 
 =================
-Scipy/Numpy Stack
+Numpy/Scipy Stack
 =================
 
 Highlevel stack
@@ -12,8 +12,8 @@ Highlevel stack
    
 
 
-Our zone
-========
+Numpy/Scipy Specific
+====================
 .. image:: _static/numpystack.png
    :scale: 50 
 

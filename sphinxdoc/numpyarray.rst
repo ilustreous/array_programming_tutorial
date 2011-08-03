@@ -5,9 +5,7 @@
 Numpy Ndarray
 =============
 
-- A NumPy array is an N-dimensional homogeneous collection of “items” of the same bytes.  
-
-- The kind can be any arbitrary structure of bytes and is specified using the data-type.
+- A ndarray is an N-dimensional homogeneous collection of “items” of the same bytes.  
 
 .. image:: _static/ndarray.png
    :scale: 50

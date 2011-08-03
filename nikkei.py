@@ -28,9 +28,9 @@ def returnsplot(start_year, end_year, data, dates):
     of dates.  Each date is a string in the format YYYY-MM-DD.
     """
     plotvals = []
-    for value, date in zip(values, dates):
-        year = int(date.split('-')[0])  # extract the year
-        if start_year <= year <= end_year:
+    for value, date in zip(data, dates):
+        #year = int(date.split('-')[0])  # extract the year
+        if start_year <= date <= end_year:
             plotvals.append(value)
     seriesplot(percent_change(plotvals))
 

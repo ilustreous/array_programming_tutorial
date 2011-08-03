@@ -18,19 +18,21 @@ Inter-mixed
 
 - IPython
 
-- Numpy/scipy stack 
-
-  - compare contrast between
-
-    - imperative programming
-
-    - sql programming
+- Numpy
 
 - Matplotlib 
 
 - Cpu/memory profiling
 
+Overview
 
+- PyTables/Hdf5
+
+- Networkx
+
+- Backtesting tools in python
+
+Suggestions from you for Friday?
 
 
 .. _ipython: http://ipython.org/

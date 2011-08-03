@@ -14,6 +14,9 @@ Basics
 
 ARR[start:stop:step, start:stop:step, ..,]::
 
+  >>> a = np.array([range(6)]*6)
+  >>> b = np.array([0,10,20,30,40,50])
+  >>> a = a + b[:, np.newaxis]
   >>> a[0,3:5]
   array([3, 4])
   
@@ -74,20 +77,6 @@ Shape and Reshape
         [3, 4, 5]])
 
 
-Reshape
-=======
-::
-
- >>> a.reshape(3,2) # new view of an array different shape
- array([[0, 1],
-        [2, 3],
-        [4, 5]])
- # reshape cannot change the 
- # number of elements in an
- # array
- >>> a.reshape(4,2)
- ValueError: total size of new array must be unchanged
- 
 =========
 Transpose
 =========
@@ -96,11 +85,7 @@ Transpose
 
  >>> a = array([[0,1,2],
  ...            [3,4,5]])
- >>> a.shape
- (2,3)
- # Transpose swaps the order
- # of axes. For 2-D this 
- # swaps rows and columns.
+
  >>> a.transpose() 
  array([[0, 3],
         [1, 4],
@@ -123,14 +108,6 @@ Returns a view::
  array([[ 0,  1,  2],
         [30,  4,  5]])
 
-Flips the stride bits::
-
- >>> a.strides
- (12, 4)
- 
- >>> a.T.strides
- (4, 12)
- 
 ======
 Dtypes
 ======
@@ -228,7 +205,9 @@ for floating point::
 ============
 Broadcasting
 ============
-
+The term broadcasting describes how numpy treats arrays with different shapes during arithmetic operations. 
+Subject to certain constraints, the smaller array is “broadcast” across the larger array so that they have compatible shapes. 
+Without making needless copies of data. 
 :: 
 
  >>> a = np.array((0,10,20,30)*3).reshape(3, 4).T
@@ -255,19 +234,16 @@ Broadcasting
 .. image:: _static/broadcasting.png
    :scale: 50
 
-Rules
-=====
+Mismatch
+========
 
- - Compare dims starting from the last
- - Match when either dimension is one or None or if dimensions are equal
- 
 .. image:: _static/badbroadcasting.png
    :scale: 50
 
->>> a = array((0,10,20,30))
->>> b = array((0,1,2))
+>>> a = np.array((0,10,20,30)*3).reshape(3, 4).T
+>>> b = array((0,1,2,3))
 >>> a + b # error
->>> y = a[:, newaxis] + b
+>>> y = a + b[:, np.newaxis]
 
 
 ==========================
@@ -276,25 +252,9 @@ Universal Function Methods
 
 A universal function (or ufunc for short) is a function that operates on
 ndarrays in an element-by-element fashion, supporting array broadcasting,
-type casting, and several other standard features. That is, a ufunc is
-a “vectorized” wrapper for a function that takes a fixed number of scalar 
-inputs and produces a fixed number of scalar outputs.
+type casting, and several other standard features. 
 
-Reduces a‘s dimension by one, by applying ufunc along one axis::
-
- >>> ufunc.reduce(a[, axis, dtype, out])
-
-Accumulate the result of applying the operator to all elements::
-
- >>> ufunc.accumulate(array[, axis, dtype, out])
-
-Performs a (local) reduce with specified slices over a single axis::
-
- >>> ufunc.reduceat(a, indices[, axis, dtype, out])	
-
-Apply the ufunc op to all pairs (a, b) with a in A and b in B::
-
- >>> ufunc.outer(A, B)	
+Set of `ufuncs <http://docs.scipy.org/doc/numpy/reference/ufuncs.html#math-operations>`_.
 
 Sum by column (default)::
 
