@@ -30,3 +30,11 @@ Bonus
 2. Verify your answer by comparing it against
    numpy's builtin standard deviation function 
    (also as a one-liner if you can). 
+
+
+
+.. toctree::
+   :maxdepth: 1
+
+   Answer <stdcalc>
+
